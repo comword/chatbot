@@ -12,6 +12,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		sleekxmpp.ClientXMPP.__init__(self, jid, password)
 		self.room = room
 		self.nick = nick
+		self.add_event_handler("message", self.message)
 		self.add_event_handler("session_start", self.start)
 #		self.add_event_handler("groupchat_message", self.muc_message)
 		self.add_event_handler("muc::%s::got_online" % self.room, self.muc_online)
@@ -33,12 +34,27 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			tofind = "@"+self.nick+" "
 			if not(msg['body'].find(tofind) == -1):
 				subm = msg['body'][msg['body'].find(tofind):]
-				for k in command_map:
-					command_map[k](msg)
+				res = self.proc_msg(subm,msg)
+				self.send_message(mto=msg['from'].bare,
+		                          mbody="%s" % (res),
+		                          mtype='groupchat')
 	def muc_online(self, presence):
 		pass
 	def muc_offline(self, presence):
 		pass
+	def message(self,msg):
+		if(msg['type']=="groupchat"):
+			pass
+		else:
+			res = self.proc_msg(msg["body"],msg)
+			self.send_message(mto=msg['from'].bare,
+                              mbody="%s" % (res),
+                              mtype='chat')
+	def proc_msg(self,subm,msg):
+		cmd = subm[subm.find("/"):]
+		cmd = cmd.split(" ",1)[0][1:]
+		if(cmd in command_map):
+			return command_map[cmd](subm[subm.find("/"):].split(),msg)
 def register(*args):
 	def decorator(f):
 		f.register = tuple(args)
