@@ -2,12 +2,15 @@
 import sys,os,imp,time
 sys.path.append(".")
 import config
-import pluginmgr
-import logging
+import register
+R = register.R()
 
-logging.basicConfig(level=logging.DEBUG,
-                        format='%(levelname)-8s %(message)s')
-xmpp = pluginmgr.plgmap["xmpp"].start_xmpp()
-xmpp.process(block=False)
-while True:
-	time.sleep(1)
+if __name__ == "__main__":
+	import pluginmgr
+	import logging
+	logging.basicConfig(level=logging.INFO,
+		                    format='%(levelname)-8s %(message)s')
+	xmpp = pluginmgr.plgmap["xmpp"].start_xmpp()
+	xmpp.process(block=False)
+	while True:
+		time.sleep(1)

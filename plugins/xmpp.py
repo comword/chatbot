@@ -1,15 +1,17 @@
 #!/usr/bin/python3
-import pluginmgr
 import sleekxmpp
 import config
-import logging
+import main
+import pluginmgr
 
 m_conf=config.get_plgconf("xmpp")
-command_map = {}
-
+xmpp_priv = {}
+xmpp_priv["moderator"] = 2
+xmpp_priv["participant"] = 4
 class MUCBot(sleekxmpp.ClientXMPP):
 	def __init__(self, jid, password, room, nick):
 		sleekxmpp.ClientXMPP.__init__(self, jid, password)
+		self.roles = dict()
 		self.room = room
 		self.nick = nick
 		self.add_event_handler("message", self.message)
@@ -35,32 +37,35 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			if not(msg['body'].find(tofind) == -1):
 				subm = msg['body'][msg['body'].find(tofind):]
 				res = self.proc_msg(subm,msg)
-				self.send_message(mto=msg['from'].bare,
+				if not(res == None):
+					self.send_message(mto=msg['from'].bare,
 		                          mbody="%s" % (res),
 		                          mtype='groupchat')
+		for k in main.R.message_map:
+			main.R.message_map[k](self,msg)
 	def muc_online(self, presence):
-		pass
+		nick = presence['from']
+		self.roles[nick] = presence['muc']['role']
+		#self.affiliations[nick] = presence['muc']['affiliation']
 	def muc_offline(self, presence):
 		pass
 	def message(self,msg):
-		if(msg['type']=="groupchat"):
-			pass
-		else:
+		if msg['type'] in ('chat', 'normal'):
 			res = self.proc_msg(msg["body"],msg)
-			self.send_message(mto=msg['from'].bare,
+			if not(res == None):
+				self.send_message(mto=msg['from'].bare,
                               mbody="%s" % (res),
                               mtype='chat')
+			for k in main.R.message_map:
+				main.R.message_map[k](self,msg)
 	def proc_msg(self,subm,msg):
 		cmd = subm[subm.find("/"):]
 		cmd = cmd.split(" ",1)[0][1:]
-		if(cmd in command_map):
-			return command_map[cmd](subm[subm.find("/"):].split(),msg)
-def register(*args):
-	def decorator(f):
-		f.register = tuple(args)
-		command_map[tuple(args)[0]] = f
-		return f
-	return decorator
+		if(cmd in main.R.command_map):
+			if(pluginmgr.plgmap["privilage"].check_priv(cmd,msg["from"])):
+				return main.R.command_map[cmd](subm[subm.find("/"):].split(),msg)
+			else:
+				return "%s: Insufficient privileges." % (msg["from"])
 
 m_bot = MUCBot(m_conf["jid"], m_conf["password"], m_conf["chatroom"][0]["room"], m_conf["chatroom"][0]["nick"])
 

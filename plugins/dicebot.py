@@ -1,24 +1,28 @@
 #!/usr/bin/python3
 import math,random
-import xmpp
-import logging
+import main
 
 rand = random.SystemRandom()
-@xmpp.register("dice")
+
+R = main.R
+@R.add("dice","oncommand")
 def go_dice(msg,orgmsg):
-	cmd = msg[1]
+	try:
+		cmd = msg[1]
+	except IndexError:
+		return None
 	try:
 		comment = msg[2]
 	except IndexError:
 		comment = ""
 	if (cmd.find('d') == -1):
-		return "Example: 2d20|+5"
+		return None
 	if not(cmd.find('|') == -1):
 		try:
 			addn = int(cmd.split('|',1)[1])
 			dcmd = cmd.split('|',1)[0]
 		except ValueError:
-			return "Example: 2d20|+5"
+			return None
 	else:
 		addn = 0
 		dcmd = cmd
@@ -37,5 +41,7 @@ def go_dice(msg,orgmsg):
 		elif addn<0:
 			return("%s Result: %s%i=%i"%(comment,res,addn,ressum))
 	else:
-		return "Example: 2d20|+5"
-	
+		return None
+
+R.set_help("dicebot","""Dice bot usage:
+/dice """)
