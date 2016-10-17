@@ -44,4 +44,14 @@ def go_dice(msg,orgmsg):
 		return None
 
 R.set_help("dicebot","""Dice bot usage:
-/dice """)
+/dice [COUNT]d[LIMIT]|[ADDITION] [DESCRIPTION]
+Randomize a sort of dices and add them up.
+Examples:
+/dice 2d6
+Result: [1, 2]+0=3
+/dice 6d6
+Result: [3, 5, 4, 3, 2, 4]+0=21
+/dice 6d6|4 Testing
+Testing Result: [5, 5, 6, 3, 2, 2]+4=27
+/dice 3d20|-5 Checking
+Checking Result: [9, 1, 20]-5=25""")

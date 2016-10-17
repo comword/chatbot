@@ -8,5 +8,5 @@ def show_help(msg,orgmsg):
 	try:
 		cmd = msg[1]
 	except IndexError:
-		return("Type /help (plugin) to get help. Type /listplugin to list all plugin.")
+		return("Type /help (plugin) to get help. Type /listplugin to list all plugins.")
 	return R.get_help(cmd)

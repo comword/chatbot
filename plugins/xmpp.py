@@ -3,11 +3,15 @@ import sleekxmpp
 import config
 import main
 import pluginmgr
+import time
 
 m_conf=config.get_plgconf("xmpp")
 xmpp_priv = {}
 xmpp_priv["moderator"] = 2
 xmpp_priv["participant"] = 4
+refractory_p=m_conf["refractory"]
+last_time = dict()
+
 class MUCBot(sleekxmpp.ClientXMPP):
 	def __init__(self, jid, password, room, nick):
 		sleekxmpp.ClientXMPP.__init__(self, jid, password)
@@ -35,11 +39,16 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		if msg['mucnick'] != self.nick:
 			tofind = "@"+self.nick+" "
 			if not(msg['body'].find(tofind) == -1):
-				subm = msg['body'][msg['body'].find(tofind):]
-				res = self.proc_msg(subm,msg)
-				if not(res == None):
-					self.send_message(mto=msg['from'].bare,
-		                          mbody="%s" % (res),
+				if (self.check_time(msg['from'])):
+					subm = msg['body'][msg['body'].find(tofind):]
+					res = self.proc_msg(subm,msg)
+					if not(res == None):
+						self.send_message(mto=msg['from'].bare,
+				                      mbody="%s" % (res),
+				                      mtype='groupchat')
+					else:
+						self.send_message(mto=msg['from'].bare,
+		                          mbody="Type /help (plugin) to get help. Type /listplugin to list all plugin.",
 		                          mtype='groupchat')
 		for k in main.R.message_map:
 			main.R.message_map[k](self,msg)
@@ -51,11 +60,16 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		pass
 	def message(self,msg):
 		if msg['type'] in ('chat', 'normal'):
-			res = self.proc_msg(msg["body"],msg)
-			if not(res == None):
-				self.send_message(mto=msg['from'].bare,
-                              mbody="%s" % (res),
-                              mtype='chat')
+			if (self.check_time(msg['from'])):
+				res = self.proc_msg(msg["body"],msg)
+				if not(res == None):
+					self.send_message(mto=msg['from'].bare,
+		                          mbody="%s" % (res),
+		                          mtype='chat')
+				else:
+					self.send_message(mto=msg['from'].bare,
+		                          mbody="Type /help (plugin) to get help. Type /listplugin to list all plugin.",
+		                          mtype='chat')
 			for k in main.R.message_map:
 				main.R.message_map[k](self,msg)
 	def proc_msg(self,subm,msg):
@@ -66,6 +80,20 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				return main.R.command_map[cmd](subm[subm.find("/"):].split(),msg)
 			else:
 				return "%s: Insufficient privileges." % (msg["from"])
+	def check_time(self,user):
+		if user in last_time:
+			if user in self.roles:
+				if self.roles[user] in refractory_p:
+					ref = refractory_p[self.roles[user]]
+					if(time.time()>last_time[user]+ref):
+						return True
+					else:
+						return False
+			else:
+				return False
+		else:
+			last_time[user] = time.time()
+			return True
 
 m_bot = MUCBot(m_conf["jid"], m_conf["password"], m_conf["chatroom"][0]["room"], m_conf["chatroom"][0]["nick"])
 
