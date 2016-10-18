@@ -48,7 +48,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				                      mtype='groupchat')
 					else:
 						self.send_message(mto=msg['from'].bare,
-		                          mbody="Type /help (plugin) to get help. Type /listplugin to list all plugin.",
+		                          mbody="Type /help (plugin) to get help. Type /listplugins to list all plugins.",
 		                          mtype='groupchat')
 		for k in main.R.message_map:
 			main.R.message_map[k](self,msg)
@@ -68,7 +68,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		                          mtype='chat')
 				else:
 					self.send_message(mto=msg['from'].bare,
-		                          mbody="Type /help (plugin) to get help. Type /listplugin to list all plugin.",
+		                          mbody="Type /help (plugin) to get help. Type /listplugins to list all plugins.",
 		                          mtype='chat')
 			for k in main.R.message_map:
 				main.R.message_map[k](self,msg)

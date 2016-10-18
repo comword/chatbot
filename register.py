@@ -25,3 +25,6 @@ class R():
 
 	def set_help(self,command,context):
 		self.help_map[command] = context
+
+#	def get_manual(self,cmd):
+#		return ""
