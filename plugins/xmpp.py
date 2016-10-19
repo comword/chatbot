@@ -4,6 +4,7 @@ import config
 import main
 import pluginmgr
 import time
+import lang
 
 m_conf=config.get_plgconf("xmpp")
 xmpp_priv = {}
@@ -48,7 +49,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				                      mtype='groupchat')
 					else:
 						self.send_message(mto=msg['from'].bare,
-		                          mbody="Type /help (plugin) to get help. Type /listplugins to list all plugins.",
+		                          mbody=_("Type /help (plugin) to get help. Type /listplugins to list all plugins."),
 		                          mtype='groupchat')
 		for k in main.R.message_map:
 			main.R.message_map[k](self,msg)
@@ -68,7 +69,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		                          mtype='chat')
 				else:
 					self.send_message(mto=msg['from'].bare,
-		                          mbody="Type /help (plugin) to get help. Type /listplugins to list all plugins.",
+		                          mbody=_("Type /help (plugin) to get help. Type /listplugins to list all plugins."),
 		                          mtype='chat')
 			for k in main.R.message_map:
 				main.R.message_map[k](self,msg)
@@ -79,7 +80,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			if(pluginmgr.plgmap["privilage"].check_priv(cmd,str(msg["from"]))):
 				return main.R.command_map[cmd](subm[subm.find("/"):].split(),msg)
 			else:
-				return "%s: Insufficient privileges." % (msg["from"])
+				return _("%(username)s: Insufficient privileges.") % {'username':msg["from"]}
 	def check_time(self,user):
 		if user in last_time:
 			if user in self.roles:

@@ -1,6 +1,7 @@
-#!/usr/bin/python3
+#!/usr/bin/env /usr/bin/python3
 import sys,os,imp,time
 sys.path.append(".")
+import lang
 import config
 import register
 R = register.R()

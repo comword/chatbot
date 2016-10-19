@@ -1,3 +1,4 @@
+import lang
 class R():
 	def __init__(self):
 		self.command_map={}
@@ -21,7 +22,7 @@ class R():
 		if command in self.help_map:
 			return self.help_map[command]
 		else:
-			return ("The help of plugin %s is not being registered in manual." % command)
+			return _("The help of plugin %(pluginname)s is not being registered in manual.") % {'pluginname':command}
 
 	def set_help(self,command,context):
 		self.help_map[command] = context

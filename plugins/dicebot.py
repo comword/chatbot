@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import math,random
 import main
+import lang
 
 rand = random.SystemRandom()
 
@@ -42,13 +43,13 @@ def go_dice(msg,orgmsg):
 			res.append(a)
 		ressum += addn
 		if addn>=0:
-			return("%s Result: %s+%i=%i"%(r_comment,res,addn,ressum))
+			return _("%(comment)s Result: %(dices)s+%(addition)i=%(result)i")%{'comment':r_comment,'dices':res,'addition':addn,'result':ressum}
 		elif addn<0:
-			return("%s Result: %s%i=%i"%(r_comment,res,addn,ressum))
+			return _("%(comment)s Result: %(dices)s%(addition)i=%(result)i")%{'comment':r_comment,'dices':res,'addition':addn,'result':ressum}
 	else:
 		return None
 
-R.set_help("dicebot","""Dice bot usage:
+R.set_help("dicebot",_("""Dice bot usage:
 /dice [COUNT]d[LIMIT]|[ADDITION] [DESCRIPTION]
 Randomize a sort of dices and add them up.
 [COUNT] should be less than 100.
@@ -61,4 +62,4 @@ Result: [3, 5, 4, 3, 2, 4]+0=21
 /dice 6d6|4 Testing
 Testing Result: [5, 5, 6, 3, 2, 2]+4=27
 /dice 3d20|-5 Checking
-Checking Result: [9, 1, 20]-5=25""")
+Checking Result: [9, 1, 20]-5=25"""))

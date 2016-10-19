@@ -2,6 +2,7 @@
 import main
 import config
 import pluginmgr
+import lang
 
 priv_map = {}
 m_conf=config.get_plgconf("privilage")
@@ -16,17 +17,17 @@ def set_priv(cmd,priv):
 def get_userpriv(user):
 	ud = pluginmgr.plgmap["users"].get_user_details(user)
 	if ("Privilage" in ud):
-		return "Username: %s has privilage %i." % (user,ud["Privilage"])
+		return _("Username: %(username)s has privilage %(pri)i.") % {'username':user,'pri':ud["Privilage"]}
 	else:
-		return "Username: %s info not exist in database." % user
+		return _("Username: %s info not exist in database.") % user
 
 def set_userpriv(user,priv):
 	ud = pluginmgr.plgmap["users"].get_user_details(user)
 	if ud == None:
-		return "Username: %s info not exist in database." % user
+		return _("Username: %s info not exist in database.") % user
 	ud["Privilage"] = priv
 	pluginmgr.plgmap["users"].set_user_details(user,ud)
-	return "Set user %s privilage to %i successfully." % (user,priv)
+	return _("Set user %(username)s privilage to %(pri)i successfully.") % {'username':user,'pri':priv}
 
 @R.add("setpriv","oncommand")
 def set_priv_msg(msg,orgmsg):
@@ -55,7 +56,7 @@ def check_priv(cmd,username):
 				priv = 2
 		ud = pluginmgr.plgmap["users"].get_user_details(username)
 		if ud == None:
-			print("Username: %s info not exist in database. Creating..." % username)
+			print(_("Username: %s info not exist in database. Creating...") % username)
 			ud = dict()
 			ud["Privilage"] = 60
 			pluginmgr.plgmap["users"].set_user_details(username,ud)

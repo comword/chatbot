@@ -2,9 +2,10 @@
 import sys,os,imp
 import config
 import main
+import lang
 
 R = main.R
-plugindir=os.getcwd()+"/plugins"
+plugindir=os.getcwd()+config.get_plgconf("path")
 sys.path.append(plugindir)
 plgmap={}
 
@@ -19,12 +20,12 @@ def list_plugins():
 
 def load_plugin(plugindir,mod_name):
 	f, filename, description = imp.find_module(mod_name,[plugindir])
-	print("Loading plugin: " + filename, description)
+	print(_("Loading plugin: %(name)s , %(desc)s") %{'name':filename, 'desc':description})
 	return imp.load_module(mod_name, f, filename, description)
 
 @R.add("listplugins","oncommand")
 def list_plugin(msg,orgmsg):
-	res = "All plugin:\n"
+	res = _("All plugin:\n")
 	for k in plgmap:
 		res+=k
 		res+="\n"

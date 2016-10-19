@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 import plyvel,os
 import config
-import main
-import json
-R = main.R
 m_conf=config.get_plgconf("users")
+import main
+R = main.R
+import json
+import lang
 
 user_db = os.getcwd()+m_conf["db_path"]+"/users.db"
 
@@ -35,7 +36,7 @@ def getu_info(msg,orgmsg):
 		if orgmsg['from'].bare+"/"+user in udb:
 			user = orgmsg['from'].bare+"/"+user
 		else:
-			return "User: %s not found in database." % user
+			return _("User: %(user)s not found in database.") % {'user':user}
 	tmpdic = udb[user]
 	last_ind = ""
 	for i in range(0,len(msg-3)):
@@ -46,9 +47,9 @@ def getu_info(msg,orgmsg):
 		res = []
 		for k in tmpdic:
 			res.append(k)
-		return "In %s has %s" % (last_ind,res)
+		return _("In %(dict)s has %(info)s") % {'dict':last_ind,'info':res}
 	else:
-		return "Result: %s" % (tmpdic)
+		return _("Result: %(res)s") % {'res':(tmpdic)}
 
 @R.add("setuinfo","oncommand")
 def setu_info(msg,orgmsg):

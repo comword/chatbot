@@ -1,0 +1,130 @@
+# English translations for PACKAGE package.
+# Copyright (C) 2016 ORGANIZATION
+# henorvell <comword@live.com>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2016-10-20 02:14+0800\n"
+"PO-Revision-Date: 2016-10-20 02:14+0800\n"
+"Last-Translator: henorvell <comword@live.com>\n"
+"Language-Team: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"Language: en_US\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: plugins/dicebot.py:46
+msgid "%(comment)s Result: %(dices)s+%(addition)i=%(result)i"
+msgstr "%(comment)s Result: %(dices)s+%(addition)i=%(result)i"
+
+#: plugins/dicebot.py:48
+msgid "%(comment)s Result: %(dices)s%(addition)i=%(result)i"
+msgstr "%(comment)s Result: %(dices)s%(addition)i=%(result)i"
+
+#: plugins/dicebot.py:52
+msgid ""
+"Dice bot usage:\n"
+"/dice [COUNT]d[LIMIT]|[ADDITION] [DESCRIPTION]\n"
+"Randomize a sort of dices and add them up.\n"
+"[COUNT] should be less than 100.\n"
+"[LIMIT] should be less than 100.\n"
+"Examples:\n"
+"/dice 2d6\n"
+"Result: [1, 2]+0=3\n"
+"/dice 6d6\n"
+"Result: [3, 5, 4, 3, 2, 4]+0=21\n"
+"/dice 6d6|4 Testing\n"
+"Testing Result: [5, 5, 6, 3, 2, 2]+4=27\n"
+"/dice 3d20|-5 Checking\n"
+"Checking Result: [9, 1, 20]-5=25"
+msgstr ""
+"Dice bot usage:\n"
+"/dice [COUNT]d[LIMIT]|[ADDITION] [DESCRIPTION]\n"
+"Randomize a sort of dices and add them up.\n"
+"[COUNT] should be less than 100.\n"
+"[LIMIT] should be less than 100.\n"
+"Examples:\n"
+"/dice 2d6\n"
+"Result: [1, 2]+0=3\n"
+"/dice 6d6\n"
+"Result: [3, 5, 4, 3, 2, 4]+0=21\n"
+"/dice 6d6|4 Testing\n"
+"Testing Result: [5, 5, 6, 3, 2, 2]+4=27\n"
+"/dice 3d20|-5 Checking\n"
+"Checking Result: [9, 1, 20]-5=25"
+
+#: plugins/help.py:13 plugins/xmpp.py:52 plugins/xmpp.py:72
+msgid "Type /help (plugin) to get help. Type /listplugins to list all plugins."
+msgstr ""
+"Type /help (plugin) to get help. Type /listplugins to list all plugins."
+
+#: plugins/logg.py:24
+msgid "This session is being logged."
+msgstr "This session is being logged."
+
+#: plugins/logg.py:30
+msgid "A new log started at %(time)s"
+msgstr "A new log started at %(time)s"
+
+#: plugins/logg.py:37
+msgid "The log is stopped at %(time)s"
+msgstr "The log is stopped at %(time)s"
+
+#: plugins/logg.py:39 plugins/logg.py:50 plugins/logg.py:61
+msgid "This session is not being logged."
+msgstr "This session is not being logged."
+
+#: plugins/logg.py:46
+msgid "Current log process paused."
+msgstr "Current log process paused."
+
+#: plugins/logg.py:48
+msgid "This logging session is paused."
+msgstr "This logging session is paused."
+
+#: plugins/logg.py:57
+msgid "Current log process resumed."
+msgstr "Current log process resumed."
+
+#: plugins/logg.py:59
+msgid "This logging session is not paused."
+msgstr "This logging session is not paused."
+
+#: plugins/logg.py:116
+msgid "Log directory not exist, creating..."
+msgstr "Log directory not exist, creating..."
+
+#: plugins/privilage.py:20
+msgid "Username: %(username)s has privilage %(pri)i."
+msgstr "Username: %(username)s has privilage %(pri)i."
+
+#: plugins/privilage.py:22 plugins/privilage.py:27
+msgid "Username: %s info not exist in database."
+msgstr "Username: %s info not exist in database."
+
+#: plugins/privilage.py:30
+msgid "Set user %(username)s privilage to %(pri)i successfully."
+msgstr "Set user %(username)s privilage to %(pri)i successfully."
+
+#: plugins/privilage.py:59
+msgid "Username: %s info not exist in database. Creating..."
+msgstr "Username: %s info not exist in database. Creating..."
+
+#: plugins/users.py:39
+msgid "User: %(user)s not found in database."
+msgstr "User: %(user)s not found in database."
+
+#: plugins/users.py:50
+msgid "In %(dict)s has %(info)s"
+msgstr "In %(dict)s has %(info)s"
+
+#: plugins/users.py:52
+msgid "Result: %(res)s"
+msgstr "Result: %(res)s"
+
+#: plugins/xmpp.py:83
+msgid "%(username)s: Insufficient privileges."
+msgstr "%(username)s: Insufficient privileges."

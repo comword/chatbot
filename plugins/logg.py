@@ -3,6 +3,7 @@ import main
 import pluginmgr
 import config
 import time,os
+import lang
 
 m_conf=config.get_plgconf("logg")
 R = main.R
@@ -20,44 +21,44 @@ def check_log_dir():
 @R.add("startlog","oncommand")
 def start_log(msg,orgmsg):
 	if orgmsg['from'].bare in log_flag:
-		return("This session is being logged.")
+		return _("This session is being logged.")
 	else:
 		log_flag[orgmsg['from'].bare] = {}
 		log_flag[orgmsg['from'].bare]["file"] = open(log_path+"/"+time.strftime("%Y%m%d%H%M%S", time.localtime())+orgmsg['from'].bare.split('@')[0]+".log",'w')
 		log_flag[orgmsg['from'].bare]["logging"] = True
 		log_flag[orgmsg['from'].bare]["sttime"] = time.localtime()
-		return("A new log started at %s" % time.strftime(ISOTIMEFORMAT, time.localtime()))
+		return _("A new log started at %(time)s")% {'time':time.strftime(ISOTIMEFORMAT, time.localtime())}
 
 @R.add("stoplog","oncommand")
 def stop_log(msg,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		log_flag[orgmsg['from'].bare]["file"].close()
 		log_flag.pop(orgmsg['from'].bare)
-		return("The log is stopped at %s" % time.strftime(ISOTIMEFORMAT, time.localtime()))
+		return _("The log is stopped at %(time)s") % {'time':time.strftime(ISOTIMEFORMAT, time.localtime())}
 	else:
-		return("This session is not being logged.")
+		return _("This session is not being logged.")
 
 @R.add("pauselog","oncommand")
 def pause_log(msg,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		if (log_flag[orgmsg['from'].bare]["logging"] == True):
 			log_flag[orgmsg['from'].bare]["logging"] = False
-			return("Current log process paused.")
+			return _("Current log process paused.")
 		else:
-			return("This logging session is paused.")
+			return _("This logging session is paused.")
 	else:
-		return("This session is not being logged.")
+		return _("This session is not being logged.")
 
 @R.add("resumelog","oncommand")
 def resume_log(msg,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		if (log_flag[orgmsg['from'].bare]["logging"] == False):
 			log_flag[orgmsg['from'].bare]["logging"] = True
-			return("Current log process resumed.")
+			return _("Current log process resumed.")
 		else:
-			return("This logging session is not paused.")
+			return _("This logging session is not paused.")
 	else:
-		return("This session is not being logged.")
+		return _("This session is not being logged.")
 
 @R.add("lslog","oncommand")
 def ls_log(msg,orgmsg):
@@ -112,7 +113,7 @@ def flite_command(cmd):
 	return cmd
 
 if (check_log_dir() == False):
-	print("Log directory not exist, creating...")
+	print (_("Log directory not exist, creating..."))
 	os.makedirs(log_path)
 
 plv.set_priv("startlog",2)

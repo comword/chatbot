@@ -1,0 +1,115 @@
+# Chinese translations for PACKAGE package.
+# Copyright (C) 2016 ORGANIZATION
+# henorvell <comword@live.com>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2016-10-20 01:00+CST\n"
+"PO-Revision-Date: 2016-10-20 01:23+0800\n"
+"Last-Translator: henorvell <comword@live.com>\n"
+"Language-Team: Chinese (simplified)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"Language: zh_CN\n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#: plugins/dicebot.py:47
+msgid "%(comment)s Result: %(dices)s+%(addition)i=%(result)i"
+msgstr "%(comment)s 结果: %(dices)s+%(addition)i=%(result)i"
+
+#: plugins/dicebot.py:49
+msgid "%(comment)s Result: %(dices)s%(addition)i=%(result)i"
+msgstr "%(comment)s 结果: %(dices)s%(addition)i=%(result)i"
+
+#: plugins/dicebot.py:53
+msgid ""
+"Dice bot usage:\n"
+"/dice [COUNT]d[LIMIT]|[ADDITION] [DESCRIPTION]\n"
+"Randomize a sort of dices and add them up.\n"
+"[COUNT] should be less than 100.\n"
+"[LIMIT] should be less than 100.\n"
+"Examples:\n"
+"/dice 2d6\n"
+"Result: [1, 2]+0=3\n"
+"/dice 6d6\n"
+"Result: [3, 5, 4, 3, 2, 4]+0=21\n"
+"/dice 6d6|4 Testing\n"
+"Testing Result: [5, 5, 6, 3, 2, 2]+4=27\n"
+"/dice 3d20|-5 Checking\n"
+"Checking Result: [9, 1, 20]-5=25"
+msgstr ""
+
+#: plugins/help.py:13 plugins/xmpp.py:53 plugins/xmpp.py:73
+msgid "Type /help (plugin) to get help. Type /listplugins to list all plugins."
+msgstr "输入/help (插件名称)来获得帮助。输入/listplugins来列出所有插件。"
+
+#: plugins/logg.py:25
+msgid "This session is being logged."
+msgstr "当前会话正在被记录。"
+
+#: plugins/logg.py:31
+msgid "A new log started at %(time)s"
+msgstr "一个新的记录开始于%(time)s。"
+
+#: plugins/logg.py:38
+msgid "The log is stopped at %(time)s"
+msgstr "当前记录在%(time)s被停止。"
+
+#: plugins/logg.py:40 plugins/logg.py:51 plugins/logg.py:62
+msgid "This session is not being logged."
+msgstr "当前会话未被正在记录。"
+
+#: plugins/logg.py:47
+msgid "Current log process paused."
+msgstr "当前的记录进程暂停了。"
+
+#: plugins/logg.py:49
+msgid "This logging session is paused."
+msgstr "当前的记录进程已经被暂停了。"
+
+#: plugins/logg.py:58
+msgid "Current log process resumed."
+msgstr "当前的记录进程恢复了。"
+
+#: plugins/logg.py:60
+msgid "This logging session is not paused."
+msgstr "当前的记录进程没有被暂停。"
+
+#: plugins/logg.py:117
+msgid "Log directory not exist, creating..."
+msgstr "日志目录不存在，正在创建..."
+
+#: plugins/privilage.py:21
+msgid "Username: %(username)s has privilage %(pri)i."
+msgstr "用户%(username)s 拥有权限%(pri)i。"
+
+#: plugins/privilage.py:23 plugins/privilage.py:28
+msgid "Username: %s info not exist in database."
+msgstr "用户%s的信息不存在。"
+
+#: plugins/privilage.py:31
+msgid "Set user %(username)s privilage to %(pri)i successfully."
+msgstr "成功设置用户%(username)s的%(pri)i的权限。"
+
+#: plugins/privilage.py:60
+msgid "Username: %s info not exist in database. Creating..."
+msgstr "用户%s的信息不存在，创建中..."
+
+#: plugins/users.py:40
+msgid "User: %(user)s not found in database."
+msgstr "用户%s的信息不存在。"
+
+#: plugins/users.py:51
+msgid "In %(dict)s has %(info)s"
+msgstr "在%(dict)s拥有信息%(info)s"
+
+#: plugins/users.py:53
+msgid "Result: %(res)s"
+msgstr "结果: %(res)s"
+
+#: plugins/xmpp.py:84
+msgid "%(username)s: Insufficient privileges."
+msgstr "用户%(username)s，权限不足。"
