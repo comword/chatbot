@@ -21,7 +21,7 @@ class R():
 		if command in self.help_map:
 			return self.help_map[command]
 		else:
-			return ("Command %s is not being registered in manual.")
+			return ("The help of plugin %s is not being registered in manual." % command)
 
 	def set_help(self,command,context):
 		self.help_map[command] = context

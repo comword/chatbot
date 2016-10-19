@@ -12,9 +12,12 @@ def go_dice(msg,orgmsg):
 	except IndexError:
 		return None
 	try:
-		comment = msg[2]
+		comment = msg[2:]
 	except IndexError:
 		comment = ""
+	r_comment=""
+	for i in comment:
+		r_comment = r_comment+i+" "
 	if (cmd.find('d') == -1):
 		return None
 	if not(cmd.find('|') == -1):
@@ -39,9 +42,9 @@ def go_dice(msg,orgmsg):
 			res.append(a)
 		ressum += addn
 		if addn>=0:
-			return("%s Result: %s+%i=%i"%(comment,res,addn,ressum))
+			return("%s Result: %s+%i=%i"%(r_comment,res,addn,ressum))
 		elif addn<0:
-			return("%s Result: %s%i=%i"%(comment,res,addn,ressum))
+			return("%s Result: %s%i=%i"%(r_comment,res,addn,ressum))
 	else:
 		return None
 

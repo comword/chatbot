@@ -2,19 +2,24 @@
 import plyvel,os
 import config
 import main
+import json
 R = main.R
 m_conf=config.get_plgconf("users")
 
 user_db = os.getcwd()+m_conf["db_path"]+"/users.db"
 
 def check_dbs():
-    plyvel.DB(user_db, create_if_missing=True)
+	plyvel.DB(user_db, create_if_missing=True)
 def get_user_details(uname):
 	db = plyvel.DB(user_db)
-	return db.get(uname)
+	tmp=db.get(uname.encode('utf-8'))
+	if tmp == None:
+		return tmp
+	else:
+		return json.loads(tmp)
 def set_user_details(uname,datas):
 	db = plyvel.DB(user_db)
-	return db.put(uname,datas)
+	return db.put(uname.encode('utf-8'),json.dumps(datas).encode('utf-8'))
 
 @R.add("getuinfo","oncommand")
 def getu_info(msg,orgmsg):

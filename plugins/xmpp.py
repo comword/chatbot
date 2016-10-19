@@ -76,7 +76,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		cmd = subm[subm.find("/"):]
 		cmd = cmd.split(" ",1)[0][1:]
 		if(cmd in main.R.command_map):
-			if(pluginmgr.plgmap["privilage"].check_priv(cmd,msg["from"])):
+			if(pluginmgr.plgmap["privilage"].check_priv(cmd,str(msg["from"]))):
 				return main.R.command_map[cmd](subm[subm.find("/"):].split(),msg)
 			else:
 				return "%s: Insufficient privileges." % (msg["from"])

@@ -25,7 +25,7 @@ def set_userpriv(user,priv):
 	if ud == None:
 		return "Username: %s info not exist in database." % user
 	ud["Privilage"] = priv
-	pluginmgr.plgmap["users"].set_user_details(ud)
+	pluginmgr.plgmap["users"].set_user_details(user,ud)
 	return "Set user %s privilage to %i successfully." % (user,priv)
 
 @R.add("setpriv","oncommand")
@@ -58,7 +58,7 @@ def check_priv(cmd,username):
 			print("Username: %s info not exist in database. Creating..." % username)
 			ud = dict()
 			ud["Privilage"] = 60
-			pluginmgr.plgmap["users"].set_user_details(ud)
+			pluginmgr.plgmap["users"].set_user_details(username,ud)
 		if ud["Privilage"]<priv:
 			priv = ud["Privilage"]
 		if (priv<=priv_map[cmd]):
