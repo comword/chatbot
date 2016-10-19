@@ -16,7 +16,7 @@ def get_user_details(uname):
 	if tmp == None:
 		return tmp
 	else:
-		return json.loads(tmp)
+		return json.loads(tmp.decode('utf-8'))
 def set_user_details(uname,datas):
 	db = plyvel.DB(user_db)
 	return db.put(uname.encode('utf-8'),json.dumps(datas).encode('utf-8'))
