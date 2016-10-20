@@ -4,7 +4,7 @@ class R():
 		self.command_map={}
 		self.message_map={}
 		self.help_map={}
-
+		self.cmd_alias={}
 	def add(self,*args):
 		def decorator(f):
 			f.register = tuple(args)
@@ -27,5 +27,26 @@ class R():
 	def set_help(self,command,context):
 		self.help_map[command] = context
 
-#	def get_manual(self,cmd):
-#		return ""
+	def set_alias(self,command,alias):
+		self.cmd_alias[alias]=command
+
+	def get_command(self,cmd):
+		if cmd in self.cmd_alias:
+			if self.cmd_alias[cmd]==cmd:
+				return _("Command %s has bad alias name.") + _("Type /help (plugin) to get help. Type /listplugins to list all plugins.") % cmd
+			elif self.cmd_alias[cmd] in self.command_map:
+				return self.command_map[self.cmd_alias[cmd]]
+			else:
+				return _("Command with alias name %s can't be found.") + _("Type /help (plugin) to get help. Type /listplugins to list all plugins.") % cmd
+		elif cmd in self.command_map:
+			return self.command_map[cmd]
+		else:
+			return _("Command %s can't be found.") % cmd
+
+	def refresh_command_map_lang(self):
+		tmp={}
+		for k in self.command_map:
+			if not _(k)==k:
+				tmp[_(k)]=k
+		self.cmd_alias = tmp
+		

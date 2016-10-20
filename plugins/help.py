@@ -5,7 +5,7 @@ R = main.R
 import lang
 
 
-@R.add("help","oncommand")
+@R.add(_("help"),"oncommand")
 def show_help(msg,orgmsg):
 	try:
 		cmd = msg[1]

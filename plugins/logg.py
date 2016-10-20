@@ -18,7 +18,7 @@ def check_log_dir():
 	else:
 		return False
 
-@R.add("startlog","oncommand")
+@R.add(_("startlog"),"oncommand")
 def start_log(msg,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		return _("This session is being logged.")
@@ -29,7 +29,7 @@ def start_log(msg,orgmsg):
 		log_flag[orgmsg['from'].bare]["sttime"] = time.localtime()
 		return _("A new log started at %(time)s")% {'time':time.strftime(ISOTIMEFORMAT, time.localtime())}
 
-@R.add("stoplog","oncommand")
+@R.add(_("stoplog"),"oncommand")
 def stop_log(msg,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		log_flag[orgmsg['from'].bare]["file"].close()
@@ -38,7 +38,7 @@ def stop_log(msg,orgmsg):
 	else:
 		return _("This session is not being logged.")
 
-@R.add("pauselog","oncommand")
+@R.add(_("pauselog"),"oncommand")
 def pause_log(msg,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		if (log_flag[orgmsg['from'].bare]["logging"] == True):
@@ -49,7 +49,7 @@ def pause_log(msg,orgmsg):
 	else:
 		return _("This session is not being logged.")
 
-@R.add("resumelog","oncommand")
+@R.add(_("resumelog"),"oncommand")
 def resume_log(msg,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		if (log_flag[orgmsg['from'].bare]["logging"] == False):
@@ -60,27 +60,27 @@ def resume_log(msg,orgmsg):
 	else:
 		return _("This session is not being logged.")
 
-@R.add("lslog","oncommand")
+@R.add(_("lslog"),"oncommand")
 def ls_log(msg,orgmsg):
 	tmp = os.popen('ls '+"."+m_conf["path"]+"|grep " + orgmsg['from'].bare.split('@',1)[0]).readlines()
 	res = ""
 	for line in tmp:
 		res += line
 	return res
-@R.add("rmlog","oncommand")
+@R.add(_("rmlog"),"oncommand")
 def rm_log(msg,orgmsg):
 	try:
 		cmd = msg[1]
-		cmd = flite_command(cmd)
+		cmd = fliter_command(cmd)
 	except IndexError:
 		return None
 	
 
-@R.add("catlog","oncommand")
+@R.add(_("catlog"),"oncommand")
 def cat_log(msg,orgmsg):
 	try:
 		cmd = msg[1]
-		cmd = flite_command(cmd)
+		cmd = fliter_command(cmd)
 	except IndexError:
 		return None
 	tmp = os.popen('cat '+"."+m_conf["path"]+"/"+ cmd +" 2>&1").readlines()
@@ -97,7 +97,7 @@ def proc_log(cla,msg):
 		else:
 			pass
 
-def flite_command(cmd):
+def fliter_command(cmd):
 	cmd = cmd.replace('/',"")
 	cmd = cmd.replace('\\',"")
 	cmd = cmd.replace(';',"")
@@ -122,3 +122,13 @@ plv.set_priv("pauselog",2)
 plv.set_priv("resumelog",2)
 plv.set_priv("rmlog",0)
 plv.set_priv("lslog",2)
+
+R.set_help("logg",_("""Log bot usage:
+/startlog	Start a new log session.
+/stoplog	Stop current log session.
+/pauselog	Pause current log session.
+/resumelog	Resume paused log session.
+/lslog	List all logs.
+/catlog <LOGNAME>	Show log.
+/rmlog <LOGNAME>	Remove log.
+"""))

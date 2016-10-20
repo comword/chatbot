@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2016-10-20 02:14+0800\n"
-"PO-Revision-Date: 2016-10-20 02:14+0800\n"
+"POT-Creation-Date: 2016-10-20 20:46+0800\n"
+"PO-Revision-Date: 2016-10-20 20:47+0800\n"
 "Last-Translator: henorvell <comword@live.com>\n"
 "Language-Team: English\n"
 "MIME-Version: 1.0\n"
@@ -15,6 +15,10 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 "Language: en_US\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: plugins/dicebot.py:9
+msgid "dice"
+msgstr "dice"
 
 #: plugins/dicebot.py:46
 msgid "%(comment)s Result: %(dices)s+%(addition)i=%(result)i"
@@ -56,10 +60,18 @@ msgstr ""
 "/dice 3d20|-5 Checking\n"
 "Checking Result: [9, 1, 20]-5=25"
 
+#: plugins/help.py:8
+msgid "help"
+msgstr "help"
+
 #: plugins/help.py:13 plugins/xmpp.py:52 plugins/xmpp.py:72
 msgid "Type /help (plugin) to get help. Type /listplugins to list all plugins."
 msgstr ""
 "Type /help (plugin) to get help. Type /listplugins to list all plugins."
+
+#: plugins/logg.py:21
+msgid "startlog"
+msgstr "startlog"
 
 #: plugins/logg.py:24
 msgid "This session is being logged."
@@ -69,6 +81,10 @@ msgstr "This session is being logged."
 msgid "A new log started at %(time)s"
 msgstr "A new log started at %(time)s"
 
+#: plugins/logg.py:32
+msgid "stoplog"
+msgstr "stoplog"
+
 #: plugins/logg.py:37
 msgid "The log is stopped at %(time)s"
 msgstr "The log is stopped at %(time)s"
@@ -76,6 +92,10 @@ msgstr "The log is stopped at %(time)s"
 #: plugins/logg.py:39 plugins/logg.py:50 plugins/logg.py:61
 msgid "This session is not being logged."
 msgstr "This session is not being logged."
+
+#: plugins/logg.py:41
+msgid "pauselog"
+msgstr "pauselog"
 
 #: plugins/logg.py:46
 msgid "Current log process paused."
@@ -85,6 +105,10 @@ msgstr "Current log process paused."
 msgid "This logging session is paused."
 msgstr "This logging session is paused."
 
+#: plugins/logg.py:52
+msgid "resumelog"
+msgstr "resumelog"
+
 #: plugins/logg.py:57
 msgid "Current log process resumed."
 msgstr "Current log process resumed."
@@ -93,9 +117,41 @@ msgstr "Current log process resumed."
 msgid "This logging session is not paused."
 msgstr "This logging session is not paused."
 
+#: plugins/logg.py:63
+msgid "lslog"
+msgstr "lslog"
+
+#: plugins/logg.py:70
+msgid "rmlog"
+msgstr "rmlog"
+
+#: plugins/logg.py:79
+msgid "catlog"
+msgstr "catlog"
+
 #: plugins/logg.py:116
 msgid "Log directory not exist, creating..."
 msgstr "Log directory not exist, creating..."
+
+#: plugins/logg.py:126
+msgid ""
+"Log bot usage:\n"
+"/startlog\tStart a new log session.\n"
+"/stoplog\tStop current log session.\n"
+"/pauselog\tPause current log session.\n"
+"/resumelog\tResume paused log session.\n"
+"/lslog\tList all logs.\n"
+"/catlog <LOGNAME>\tShow log.\n"
+"/rmlog <LOGNAME>\tRemove log.\n"
+msgstr ""
+"Log bot usage:\n"
+"/startlog\tStart a new log session.\n"
+"/stoplog\tStop current log session.\n"
+"/pauselog\tPause current log session.\n"
+"/resumelog\tResume paused log session.\n"
+"/lslog\tList all logs.\n"
+"/catlog <LOGNAME>\tShow log.\n"
+"/rmlog <LOGNAME>\tRemove log.\n"
 
 #: plugins/privilage.py:20
 msgid "Username: %(username)s has privilage %(pri)i."
@@ -109,9 +165,31 @@ msgstr "Username: %s info not exist in database."
 msgid "Set user %(username)s privilage to %(pri)i successfully."
 msgstr "Set user %(username)s privilage to %(pri)i successfully."
 
+#: plugins/privilage.py:32
+msgid "setpriv"
+msgstr "setpriv"
+
+#: plugins/privilage.py:41
+msgid "getpriv"
+msgstr "getpriv"
+
 #: plugins/privilage.py:59
 msgid "Username: %s info not exist in database. Creating..."
 msgstr "Username: %s info not exist in database. Creating..."
+
+#: plugins/privilage.py:70
+msgid ""
+"Privilage system usage:\n"
+"/setpriv\tSet user privilage.\n"
+"/getpriv\tGet user privilage.\n"
+msgstr ""
+"Privilage system usage:\n"
+"/setpriv\tSet user privilage.\n"
+"/getpriv\tGet user privilage.\n"
+
+#: plugins/users.py:25
+msgid "getuinfo"
+msgstr "getuinfo"
 
 #: plugins/users.py:39
 msgid "User: %(user)s not found in database."
@@ -125,6 +203,10 @@ msgstr "In %(dict)s has %(info)s"
 msgid "Result: %(res)s"
 msgstr "Result: %(res)s"
 
-#: plugins/xmpp.py:83
+#: plugins/users.py:54
+msgid "setuinfo"
+msgstr "setuinfo"
+
+#: plugins/xmpp.py:86
 msgid "%(username)s: Insufficient privileges."
 msgstr "%(username)s: Insufficient privileges."

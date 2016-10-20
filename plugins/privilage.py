@@ -29,7 +29,7 @@ def set_userpriv(user,priv):
 	pluginmgr.plgmap["users"].set_user_details(user,ud)
 	return _("Set user %(username)s privilage to %(pri)i successfully.") % {'username':user,'pri':priv}
 
-@R.add("setpriv","oncommand")
+@R.add(_("setpriv"),"oncommand")
 def set_priv_msg(msg,orgmsg):
 	try:
 		cmd = msg[1]
@@ -38,7 +38,7 @@ def set_priv_msg(msg,orgmsg):
 		return None
 	return set_userpriv(cmd,cmd2)
 
-@R.add("getpriv","oncommand")
+@R.add(_("getpriv"),"oncommand")
 def get_priv_msg(msg,orgmsg):
 	try:
 		cmd = msg[1]
@@ -66,3 +66,8 @@ def check_priv(cmd,username):
 			return True
 		else:
 			return False
+
+R.set_help("privilage",_("""Privilage system usage:
+/setpriv	Set user privilage.
+/getpriv	Get user privilage.
+"""))

@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2016-10-20 01:00+CST\n"
-"PO-Revision-Date: 2016-10-20 01:23+0800\n"
+"POT-Creation-Date: 2016-10-20 21:04+0800\n"
+"PO-Revision-Date: 2016-10-20 21:18+0800\n"
 "Last-Translator: henorvell <comword@live.com>\n"
 "Language-Team: Chinese (simplified)\n"
 "MIME-Version: 1.0\n"
@@ -16,15 +16,31 @@ msgstr ""
 "Language: zh_CN\n"
 "X-Generator: Poedit 1.8.7.1\n"
 
-#: plugins/dicebot.py:47
+#: lang.py:44
+msgid "Language %(la)s applied successfully."
+msgstr "成功应用%(la)s语言。"
+
+#: pluginmgr.py:23
+msgid "Loading plugin: %(name)s , %(desc)s"
+msgstr "加载插件：%(name)s , %(desc)s"
+
+#: pluginmgr.py:28
+msgid "All plugin:\n"
+msgstr "所有插件：\n"
+
+#: plugins/dicebot.py:9
+msgid "dice"
+msgstr "骰子"
+
+#: plugins/dicebot.py:46
 msgid "%(comment)s Result: %(dices)s+%(addition)i=%(result)i"
 msgstr "%(comment)s 结果: %(dices)s+%(addition)i=%(result)i"
 
-#: plugins/dicebot.py:49
+#: plugins/dicebot.py:48
 msgid "%(comment)s Result: %(dices)s%(addition)i=%(result)i"
 msgstr "%(comment)s 结果: %(dices)s%(addition)i=%(result)i"
 
-#: plugins/dicebot.py:53
+#: plugins/dicebot.py:52
 msgid ""
 "Dice bot usage:\n"
 "/dice [COUNT]d[LIMIT]|[ADDITION] [DESCRIPTION]\n"
@@ -42,74 +58,158 @@ msgid ""
 "Checking Result: [9, 1, 20]-5=25"
 msgstr ""
 
-#: plugins/help.py:13 plugins/xmpp.py:53 plugins/xmpp.py:73
-msgid "Type /help (plugin) to get help. Type /listplugins to list all plugins."
-msgstr "输入/help (插件名称)来获得帮助。输入/listplugins来列出所有插件。"
+#: plugins/help.py:8
+msgid "help"
+msgstr "帮助"
 
-#: plugins/logg.py:25
+#: plugins/help.py:13 plugins/xmpp.py:52 plugins/xmpp.py:72 register.py:36
+#: register.py:40
+msgid "Type /help (plugin) to get help. Type /listplugins to list all plugins."
+msgstr "输入 /帮助 (插件名称) 来获得帮助。输入 /列出插件 来列出所有插件。"
+
+#: plugins/logg.py:21
+msgid "startlog"
+msgstr "开始日志"
+
+#: plugins/logg.py:24
 msgid "This session is being logged."
 msgstr "当前会话正在被记录。"
 
-#: plugins/logg.py:31
+#: plugins/logg.py:30
 msgid "A new log started at %(time)s"
 msgstr "一个新的记录开始于%(time)s。"
 
-#: plugins/logg.py:38
+#: plugins/logg.py:32
+msgid "stoplog"
+msgstr "停止日志"
+
+#: plugins/logg.py:37
 msgid "The log is stopped at %(time)s"
 msgstr "当前记录在%(time)s被停止。"
 
-#: plugins/logg.py:40 plugins/logg.py:51 plugins/logg.py:62
+#: plugins/logg.py:39 plugins/logg.py:50 plugins/logg.py:61
 msgid "This session is not being logged."
-msgstr "当前会话未被正在记录。"
+msgstr "当前会话未正在被记录。"
 
-#: plugins/logg.py:47
+#: plugins/logg.py:41
+msgid "pauselog"
+msgstr "暂停日志"
+
+#: plugins/logg.py:46
 msgid "Current log process paused."
 msgstr "当前的记录进程暂停了。"
 
-#: plugins/logg.py:49
+#: plugins/logg.py:48
 msgid "This logging session is paused."
 msgstr "当前的记录进程已经被暂停了。"
 
-#: plugins/logg.py:58
+#: plugins/logg.py:52
+msgid "resumelog"
+msgstr "恢复日志"
+
+#: plugins/logg.py:57
 msgid "Current log process resumed."
 msgstr "当前的记录进程恢复了。"
 
-#: plugins/logg.py:60
+#: plugins/logg.py:59
 msgid "This logging session is not paused."
 msgstr "当前的记录进程没有被暂停。"
 
-#: plugins/logg.py:117
+#: plugins/logg.py:63
+msgid "lslog"
+msgstr "列出日志"
+
+#: plugins/logg.py:70
+msgid "rmlog"
+msgstr "删除日志"
+
+#: plugins/logg.py:79
+msgid "catlog"
+msgstr "显示日志"
+
+#: plugins/logg.py:116
 msgid "Log directory not exist, creating..."
 msgstr "日志目录不存在，正在创建..."
 
-#: plugins/privilage.py:21
+#: plugins/logg.py:126
+msgid ""
+"Log bot usage:\n"
+"/startlog\tStart a new log session.\n"
+"/stoplog\tStop current log session.\n"
+"/pauselog\tPause current log session.\n"
+"/resumelog\tResume paused log session.\n"
+"/lslog\tList all logs.\n"
+"/catlog <LOGNAME>\tShow log.\n"
+"/rmlog <LOGNAME>\tRemove log.\n"
+msgstr ""
+
+#: plugins/privilage.py:20
 msgid "Username: %(username)s has privilage %(pri)i."
 msgstr "用户%(username)s 拥有权限%(pri)i。"
 
-#: plugins/privilage.py:23 plugins/privilage.py:28
+#: plugins/privilage.py:22 plugins/privilage.py:27
 msgid "Username: %s info not exist in database."
-msgstr "用户%s的信息不存在。"
+msgstr "用户%s的信息不存在，创建中..."
 
-#: plugins/privilage.py:31
+#: plugins/privilage.py:30
 msgid "Set user %(username)s privilage to %(pri)i successfully."
 msgstr "成功设置用户%(username)s的%(pri)i的权限。"
 
-#: plugins/privilage.py:60
+#: plugins/privilage.py:32
+msgid "setpriv"
+msgstr "设置权限"
+
+#: plugins/privilage.py:41
+msgid "getpriv"
+msgstr "获取权限"
+
+#: plugins/privilage.py:59
 msgid "Username: %s info not exist in database. Creating..."
 msgstr "用户%s的信息不存在，创建中..."
 
-#: plugins/users.py:40
+#: plugins/privilage.py:70
+msgid ""
+"Privilage system usage:\n"
+"/setpriv\tSet user privilage.\n"
+"/getpriv\tGet user privilage.\n"
+msgstr ""
+
+#: plugins/users.py:25
+msgid "getuinfo"
+msgstr "获取用户信息"
+
+#: plugins/users.py:39
 msgid "User: %(user)s not found in database."
 msgstr "用户%s的信息不存在。"
 
-#: plugins/users.py:51
+#: plugins/users.py:50
 msgid "In %(dict)s has %(info)s"
 msgstr "在%(dict)s拥有信息%(info)s"
 
-#: plugins/users.py:53
+#: plugins/users.py:52
 msgid "Result: %(res)s"
 msgstr "结果: %(res)s"
 
-#: plugins/xmpp.py:84
+#: plugins/users.py:54
+msgid "setuinfo"
+msgstr "设置用户信息"
+
+#: plugins/xmpp.py:86
 msgid "%(username)s: Insufficient privileges."
 msgstr "用户%(username)s，权限不足。"
+
+#: register.py:25
+msgid "The help of plugin %(pluginname)s is not being registered in manual."
+msgstr "插件%(pluginname)s的帮助信息未在手册中注册。"
+
+#: register.py:36
+msgid "Command %s has bad alias name."
+msgstr "命令%s的别名错误。"
+
+#: register.py:40
+msgid "Command with alias name %s can't be found."
+msgstr "拥有别名%s的命令无法被找到。"
+
+#: register.py:44
+msgid "Command %s can't be found."
+msgstr "命令%s无法被找到。"

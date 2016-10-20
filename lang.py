@@ -4,7 +4,9 @@ import locale
 import babel
 import os
 import config
+import main
 
+R=main.R
 appname = config.datamap["appname"]
 c_locale=config.get_plgconf("languages")
 gettext.bindtextdomain(appname, os.getcwd()+c_locale["locale"]+"/")
@@ -38,5 +40,6 @@ def change_locale(msg,orgmsg):
 		newlang.install()
 	except FileNotFoundError as e:
 		return "%s" % e
+	R.refresh_command_map_lang()
 	return _("Language %(la)s applied successfully.") % {'la':la}
 
