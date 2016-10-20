@@ -22,7 +22,7 @@ def set_user_details(uname,datas):
 	db = plyvel.DB(user_db)
 	return db.put(uname.encode('utf-8'),json.dumps(datas).encode('utf-8'))
 
-@R.add("getuinfo","oncommand")
+@R.add(_("getuinfo"),"oncommand")
 def getu_info(msg,orgmsg):
 	try:
 		user = msg[1]
@@ -53,7 +53,7 @@ def getu_info(msg,orgmsg):
 	else:
 		return _("Result: %(res)s") % {'res':(tmpdic)}
 
-@R.add("setuinfo","oncommand")
+@R.add(_("setuinfo"),"oncommand")
 def setu_info(msg,orgmsg):
 	try:
 		user = msg[1]

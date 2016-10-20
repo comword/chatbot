@@ -6,7 +6,7 @@ import lang
 rand = random.SystemRandom()
 
 R = main.R
-@R.add("dice","oncommand")
+@R.add(_("dice"),"oncommand")
 def go_dice(msg,orgmsg):
 	try:
 		cmd = msg[1]

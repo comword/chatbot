@@ -76,11 +76,14 @@ class MUCBot(sleekxmpp.ClientXMPP):
 	def proc_msg(self,subm,msg):
 		cmd = subm[subm.find("/"):]
 		cmd = cmd.split(" ",1)[0][1:]
-		if(cmd in main.R.command_map):
-			if(pluginmgr.plgmap["privilage"].check_priv(cmd,str(msg["from"]))):
-				return main.R.command_map[cmd](subm[subm.find("/"):].split(),msg)
+		if(pluginmgr.plgmap["privilage"].check_priv(cmd,str(msg["from"]))):
+			func = main.R.get_command(cmd)
+			if isinstance(func,str):
+				return func
 			else:
-				return _("%(username)s: Insufficient privileges.") % {'username':msg["from"]}
+				return func(subm[subm.find("/"):].split(),msg)
+		else:
+			return _("%(username)s: Insufficient privileges.") % {'username':msg["from"]}
 	def check_time(self,user):
 		if user in last_time:
 			if user in self.roles:
