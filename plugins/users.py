@@ -32,6 +32,8 @@ def getu_info(msg,orgmsg):
 	except IndexError:
 		return None
 	udb = get_user_details(user)
+	if udb == None:
+		return _("Index %(ind)s not found in user %(user)s") % {'ind':subdic,'user':user}
 	if not user in udb:
 		if orgmsg['from'].bare+"/"+user in udb:
 			user = orgmsg['from'].bare+"/"+user
