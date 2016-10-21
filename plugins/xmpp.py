@@ -11,6 +11,7 @@ xmpp_priv = {}
 xmpp_priv["moderator"] = 2
 xmpp_priv["participant"] = 4
 refractory_p=m_conf["refractory"]
+refr_alert={}
 last_time = dict()
 
 class MUCBot(sleekxmpp.ClientXMPP):
@@ -40,7 +41,8 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		if msg['mucnick'] != self.nick:
 			tofind = "@"+self.nick+" "
 			if not(msg['body'].find(tofind) == -1):
-				if (self.check_time(msg['from'])):
+				tim = self.check_time(msg['from'],False)
+				if (tim[0]):
 					subm = msg['body'][msg['body'].find(tofind):]
 					res = self.proc_msg(subm,msg)
 					if not(res == None):
@@ -51,6 +53,10 @@ class MUCBot(sleekxmpp.ClientXMPP):
 						self.send_message(mto=msg['from'].bare,
 		                          mbody=_("Type /help (plugin) to get help. Type /listplugins to list all plugins."),
 		                          mtype='groupchat')
+				elif not(tim[1] == ""):
+					self.send_message(mto=msg['from'].bare,
+				                      mbody="%s" % (tim[1]),
+				                      mtype='groupchat')
 		for k in main.R.message_map:
 			main.R.message_map[k](self,msg)
 	def muc_online(self, presence):
@@ -61,7 +67,8 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		pass
 	def message(self,msg):
 		if msg['type'] in ('chat', 'normal'):
-			if (self.check_time(msg['from'])):
+			tim = self.check_time(msg['from'],True)
+			if (tim[0]):
 				res = self.proc_msg(msg["body"],msg)
 				if not(res == None):
 					self.send_message(mto=msg['from'].bare,
@@ -70,6 +77,10 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				else:
 					self.send_message(mto=msg['from'].bare,
 		                          mbody=_("Type /help (plugin) to get help. Type /listplugins to list all plugins."),
+		                          mtype='chat')
+			elif not(tim[1] == ""):
+					self.send_message(mto=msg['from'].bare,
+		                          mbody="%s" % (tim[1]),
 		                          mtype='chat')
 			for k in main.R.message_map:
 				main.R.message_map[k](self,msg)
@@ -84,20 +95,29 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				return func(subm[subm.find("/"):].split(),msg)
 		else:
 			return _("%(username)s: Insufficient privileges.") % {'username':msg["from"]}
-	def check_time(self,user):
+	def check_time(self,user,ischat):
 		if user in last_time:
-			if user in self.roles:
+			if user in refractory_p:
+				ref = refractory_p[user]
+			elif user in self.roles:
 				if self.roles[user] in refractory_p:
 					ref = refractory_p[self.roles[user]]
-					if(time.time()>last_time[user]+ref):
-						return True
-					else:
-						return False
+			elif ischat:
+				ref = refractory_p["<CHAT>"]
 			else:
-				return False
+				ref = refractory_p["<OTHER>"]
+			if(time.time()>last_time[user]+ref):
+				return True,""
+			else:
+				if refr_alert[user] == False :
+					refr_alert[user]=True
+					return False,_("Don't use this bot too frequently. %(user)s cool time is %(sec)i second.") % {'user':user,'sec':ref}
+				else:
+					return False,""
 		else:
 			last_time[user] = time.time()
-			return True
+			refr_alert[user] = False
+			return True,""
 
 m_bot = MUCBot(m_conf["jid"], m_conf["password"], m_conf["chatroom"][0]["room"], m_conf["chatroom"][0]["nick"])
 

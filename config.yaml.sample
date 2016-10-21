@@ -1,0 +1,32 @@
+%YAML 1.2
+---
+appname: xmppbot
+plugins:
+    path: /plugins
+    loading:
+        - xmpp
+        - help
+        - users
+        - privilage
+        - logg
+        - dicebot
+    users:
+        db_path: /datas
+    xmpp:
+        jid: 
+        password: 
+        chatroom:
+            - room: 
+              nick: 
+#              password:
+        refractory:
+            <OTHER>: 20
+            <CHAT>: 8
+            moderator : 4
+            participant: 10
+    privilage:
+    logg:
+        path: /logs
+    languages:
+        default: en_US
+        locale: /locales/mo
