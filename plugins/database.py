@@ -1,26 +1,33 @@
 #!/usr/bin/python3
 import plyvel,os
 import config
-m_conf=config.get_plgconf("users")
+m_conf=config.get_plgconf("database")
 import main
+import pluginmgr
 R = main.R
 import json
 import lang
+import yaml
 
-user_db = os.getcwd()+m_conf["db_path"]+"/users.db"
+user_db = os.getcwd()+m_conf["user_path"]
 
 def check_dbs():
 	plyvel.DB(user_db, create_if_missing=True)
 def get_user_details(uname):
 	db = plyvel.DB(user_db)
 	tmp=db.get(uname.encode('utf-8'))
+	print(uname,tmp)
+	db.close()
 	if tmp == None:
 		return tmp
 	else:
 		return json.loads(tmp.decode('utf-8'))
 def set_user_details(uname,datas):
 	db = plyvel.DB(user_db)
-	return db.put(uname.encode('utf-8'),json.dumps(datas).encode('utf-8'))
+	print(uname,datas)
+	res = db.put(uname.encode('utf-8'),json.dumps(datas).encode('utf-8'))
+	db.close()
+	return res
 
 @R.add(_("getuinfo"),"oncommand")
 def getu_info(msg,orgmsg):
@@ -61,4 +68,16 @@ def setu_info(msg,orgmsg):
 		return None
 	return None
 
+@R.add(_("parseyaml"),"oncommand")
+def parse_yaml(msg,orgmsg):
+	try:
+		user = msg[1]
+	except IndexError:
+		return None
+	return None
+
+plv = pluginmgr.plgmap["privilage"]
+plv.set_priv("setuinfo",2)
+plv.set_priv("getuinfo",2)
+plv.set_priv("parseyaml",2)
 check_dbs()

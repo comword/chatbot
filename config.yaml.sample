@@ -6,19 +6,21 @@ plugins:
     loading:
         - xmpp
         - help
-        - users
         - privilage
+        - database
         - logg
         - dicebot
-    users:
-        db_path: /datas
+    database:
+        user_path: /datas/users.db
     xmpp:
-        jid: 
-        password: 
-        chatroom:
-            - room: 
-              nick: 
+        jid: <***>
+        password: <***>
+        chatrooms:
+            - room: <***>
+              nick: <***>
 #              password:
+            - room: <***>
+              nick: <***>
         refractory:
             <OTHER>: 20
             <CHAT>: 8

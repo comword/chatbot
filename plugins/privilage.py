@@ -15,19 +15,20 @@ def set_priv(cmd,priv):
 	priv_map[cmd] = priv
 
 def get_userpriv(user):
-	ud = pluginmgr.plgmap["users"].get_user_details(user)
+	ud = pluginmgr.plgmap["database"].get_user_details(user)
 	if ("Privilage" in ud):
 		return _("Username: %(username)s has privilage %(pri)i.") % {'username':user,'pri':ud["Privilage"]}
 	else:
 		return _("Username: %s info not exist in database.") % user
 
 def set_userpriv(user,priv):
-	ud = pluginmgr.plgmap["users"].get_user_details(user)
+	ud = pluginmgr.plgmap["database"].get_user_details(user)
 	if ud == None:
-		return _("Username: %s info not exist in database.") % user
-	ud["Privilage"] = priv
-	pluginmgr.plgmap["users"].set_user_details(user,ud)
-	return _("Set user %(username)s privilage to %(pri)i successfully.") % {'username':user,'pri':priv}
+		ud={}
+		#return _("Username: %s info not exist in database.") % user
+	ud["Privilage"] = int(priv)
+	pluginmgr.plgmap["database"].set_user_details(user,ud)
+	return _("Set user %(username)s privilage to %(pri)i successfully.") % {'username':user,'pri':int(priv)}
 
 @R.add(_("setpriv"),"oncommand")
 def set_priv_msg(msg,orgmsg):
@@ -45,27 +46,31 @@ def get_priv_msg(msg,orgmsg):
 	except IndexError:
 		return None
 	return get_userpriv(cmd)
-	
+
 def check_priv(cmd,username):
 	if not(cmd in priv_map):
 		return True
 	else:
 		priv = 100
+		print(pluginmgr.plgmap["xmpp"].m_bot.roles)
 		if username in pluginmgr.plgmap["xmpp"].m_bot.roles:
 			if (pluginmgr.plgmap["xmpp"].m_bot.roles[username] == "moderator"):
 				priv = 2
-		ud = pluginmgr.plgmap["users"].get_user_details(username)
+		ud = pluginmgr.plgmap["database"].get_user_details(username)
 		if ud == None:
 			print(_("Username: %s info not exist in database. Creating...") % username)
 			ud = dict()
 			ud["Privilage"] = 60
-			pluginmgr.plgmap["users"].set_user_details(username,ud)
+			pluginmgr.plgmap["database"].set_user_details(username,ud)
 		if ud["Privilage"]<priv:
 			priv = ud["Privilage"]
 		if (priv<=priv_map[cmd]):
 			return True
 		else:
 			return False
+
+set_priv("getpriv",2)
+set_priv("setpriv",2)
 
 R.set_help("privilage",_("""Privilage system usage:
 /setpriv	Set user privilage.

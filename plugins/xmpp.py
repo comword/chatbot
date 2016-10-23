@@ -15,31 +15,32 @@ refr_alert={}
 last_time = dict()
 
 class MUCBot(sleekxmpp.ClientXMPP):
-	def __init__(self, jid, password, room, nick):
+	def __init__(self, jid, password, roomlist):
 		sleekxmpp.ClientXMPP.__init__(self, jid, password)
 		self.roles = dict()
-		self.room = room
-		self.nick = nick
+		self.roomlist = roomlist
 		self.add_event_handler("message", self.message)
 		self.add_event_handler("session_start", self.start)
-#		self.add_event_handler("groupchat_message", self.muc_message)
-		self.add_event_handler("muc::%s::got_online" % self.room, self.muc_online)
-		self.add_event_handler("muc::%s::got_offline" % self.room, self.muc_offline)
-		self.add_event_handler("muc::%s::message" % self.room, self.muc_message)
+		self.add_event_handler("groupchat_message", self.muc_message)
+		self.add_event_handler("groupchat_presence", self.muc_presence)
+#		self.add_event_handler("muc::%s::got_online" % self.room, self.muc_online)
+#		self.add_event_handler("muc::%s::got_offline" % self.room, self.muc_offline)
+#		self.add_event_handler("muc::%s::message" % self.room, self.muc_message)
 		self.register_plugin('xep_0030') # Service Discovery
 		self.register_plugin('xep_0045') # Multi-User Chat
 		self.register_plugin('xep_0199') # XMPP Ping
 	def start(self, event):
 		self.get_roster()
 		self.send_presence()
-		self.plugin['xep_0045'].joinMUC(self.room,
-                                        self.nick,
-                                        # If a room password is needed, use:
-                                        # password=the_room_password,
-                                        wait=True)
+		for room in self.roomlist:
+			if "password" in room:
+				self.plugin['xep_0045'].joinMUC(room["room"],room["nick"],password=room["password"],wait=True)
+			else:
+				self.plugin['xep_0045'].joinMUC(room["room"],room["nick"],wait=True)
 	def muc_message(self, msg):
-		if msg['mucnick'] != self.nick:
-			tofind = "@"+self.nick+" "
+		nick = self.find_nick(msg["from"].bare)
+		if msg['mucnick'] != nick:
+			tofind = nick+": "
 			if not(msg['body'].find(tofind) == -1):
 				tim = self.check_time(msg['from'],False)
 				if (tim[0]):
@@ -59,12 +60,9 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				                      mtype='groupchat')
 		for k in main.R.message_map:
 			main.R.message_map[k](self,msg)
-	def muc_online(self, presence):
+	def muc_presence(self, presence):
 		nick = presence['from']
 		self.roles[nick] = presence['muc']['role']
-		#self.affiliations[nick] = presence['muc']['affiliation']
-	def muc_offline(self, presence):
-		pass
 	def message(self,msg):
 		if msg['type'] in ('chat', 'normal'):
 			tim = self.check_time(msg['from'],True)
@@ -85,6 +83,11 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			for k in main.R.message_map:
 				main.R.message_map[k](self,msg)
 	def proc_msg(self,subm,msg):
+		if msg['from'].bare in lang.lang_map:
+			lang.chg_loc(lang.lang_map[msg['from'].bare])
+		else:
+			lang.lang_map[msg['from'].bare]=lang.c_locale["default"]
+			lang.chg_loc(lang.lang_map[msg['from'].bare])
 		cmd = subm[subm.find("/"):]
 		cmd = cmd.split(" ",1)[0][1:]
 		if(pluginmgr.plgmap["privilage"].check_priv(cmd,str(msg["from"]))):
@@ -119,7 +122,13 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			refr_alert[user] = False
 			return True,""
 
-m_bot = MUCBot(m_conf["jid"], m_conf["password"], m_conf["chatroom"][0]["room"], m_conf["chatroom"][0]["nick"])
+	def find_nick(self,room):
+		for it in self.roomlist:
+			if room == it["room"]:
+				return it["nick"]
+		return False
+
+m_bot = MUCBot(m_conf["jid"], m_conf["password"], m_conf["chatrooms"])
 
 def start_xmpp():
 	if m_bot.connect():
