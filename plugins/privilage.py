@@ -52,7 +52,6 @@ def check_priv(cmd,username):
 		return True
 	else:
 		priv = 100
-		print(pluginmgr.plgmap["xmpp"].m_bot.roles)
 		if username in pluginmgr.plgmap["xmpp"].m_bot.roles:
 			if (pluginmgr.plgmap["xmpp"].m_bot.roles[username] == "moderator"):
 				priv = 2

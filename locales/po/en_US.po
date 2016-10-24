@@ -1,20 +1,68 @@
 # English translations for PACKAGE package.
 # Copyright (C) 2016 ORGANIZATION
-# henorvell <comword@live.com>, 2016.
+#  <comword@live.com>, 2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2016-10-20 20:46+0800\n"
-"PO-Revision-Date: 2016-10-20 20:47+0800\n"
-"Last-Translator: henorvell <comword@live.com>\n"
+"POT-Creation-Date: 2016-10-24 08:26+0800\n"
+"PO-Revision-Date: 2016-10-24 08:27+0800\n"
+"Last-Translator:  <comword@live.com>\n"
 "Language-Team: English\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=ASCII\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 "Language: en_US\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: lang.py:25
+msgid "listlangs"
+msgstr "listlangs"
+
+#: lang.py:33
+msgid "changelocale"
+msgstr "changelocale"
+
+#: lang.py:46
+msgid "Language %(la)s applied successfully."
+msgstr "Language %(la)s applied successfully."
+
+#: pluginmgr.py:23
+msgid "Loading plugin: %(name)s , %(desc)s"
+msgstr "Loading plugin: %(name)s , %(desc)s"
+
+#: pluginmgr.py:28
+msgid "All plugin:\n"
+msgstr "All plugin:\n"
+
+#: plugins/database.py:32
+msgid "getuinfo"
+msgstr "getuinfo"
+
+#: plugins/database.py:43
+msgid "Index %(ind)s not found in user %(user)s"
+msgstr "Index %(ind)s not found in user %(user)s"
+
+#: plugins/database.py:48
+msgid "User: %(user)s not found in database."
+msgstr "User: %(user)s not found in database."
+
+#: plugins/database.py:59
+msgid "In %(dict)s has %(info)s"
+msgstr "In %(dict)s has %(info)s"
+
+#: plugins/database.py:61
+msgid "Result: %(res)s"
+msgstr "Result: %(res)s"
+
+#: plugins/database.py:63
+msgid "setuinfo"
+msgstr "setuinfo"
+
+#: plugins/database.py:71
+msgid "parseyaml"
+msgstr "parseyaml"
 
 #: plugins/dicebot.py:9
 msgid "dice"
@@ -64,7 +112,8 @@ msgstr ""
 msgid "help"
 msgstr "help"
 
-#: plugins/help.py:13 plugins/xmpp.py:52 plugins/xmpp.py:72
+#: plugins/help.py:13 plugins/xmpp.py:55 plugins/xmpp.py:77 register.py:36
+#: register.py:40
 msgid "Type /help (plugin) to get help. Type /listplugins to list all plugins."
 msgstr ""
 "Type /help (plugin) to get help. Type /listplugins to list all plugins."
@@ -157,27 +206,27 @@ msgstr ""
 msgid "Username: %(username)s has privilage %(pri)i."
 msgstr "Username: %(username)s has privilage %(pri)i."
 
-#: plugins/privilage.py:22 plugins/privilage.py:27
+#: plugins/privilage.py:22
 msgid "Username: %s info not exist in database."
 msgstr "Username: %s info not exist in database."
 
-#: plugins/privilage.py:30
+#: plugins/privilage.py:31
 msgid "Set user %(username)s privilage to %(pri)i successfully."
 msgstr "Set user %(username)s privilage to %(pri)i successfully."
 
-#: plugins/privilage.py:32
+#: plugins/privilage.py:33
 msgid "setpriv"
 msgstr "setpriv"
 
-#: plugins/privilage.py:41
+#: plugins/privilage.py:42
 msgid "getpriv"
 msgstr "getpriv"
 
-#: plugins/privilage.py:59
+#: plugins/privilage.py:61
 msgid "Username: %s info not exist in database. Creating..."
 msgstr "Username: %s info not exist in database. Creating..."
 
-#: plugins/privilage.py:70
+#: plugins/privilage.py:75
 msgid ""
 "Privilage system usage:\n"
 "/setpriv\tSet user privilage.\n"
@@ -187,26 +236,28 @@ msgstr ""
 "/setpriv\tSet user privilage.\n"
 "/getpriv\tGet user privilage.\n"
 
-#: plugins/users.py:25
-msgid "getuinfo"
-msgstr "getuinfo"
-
-#: plugins/users.py:39
-msgid "User: %(user)s not found in database."
-msgstr "User: %(user)s not found in database."
-
-#: plugins/users.py:50
-msgid "In %(dict)s has %(info)s"
-msgstr "In %(dict)s has %(info)s"
-
-#: plugins/users.py:52
-msgid "Result: %(res)s"
-msgstr "Result: %(res)s"
-
-#: plugins/users.py:54
-msgid "setuinfo"
-msgstr "setuinfo"
-
-#: plugins/xmpp.py:86
+#: plugins/xmpp.py:100
 msgid "%(username)s: Insufficient privileges."
 msgstr "%(username)s: Insufficient privileges."
+
+#: plugins/xmpp.py:117
+msgid ""
+"Don't use this bot too frequently. %(user)s cool time is %(sec)i second."
+msgstr ""
+"Don't use this bot too frequently. %(user)s cool time is %(sec)i second."
+
+#: register.py:25
+msgid "The help of plugin %(pluginname)s is not being registered in manual."
+msgstr "The help of plugin %(pluginname)s is not being registered in manual."
+
+#: register.py:36
+msgid "Command %s has bad alias name."
+msgstr "Command %s has bad alias name."
+
+#: register.py:40
+msgid "Command with alias name %s can't be found."
+msgstr "Command with alias name %s can't be found."
+
+#: register.py:44
+msgid "Command %s can't be found."
+msgstr "Command %s can't be found."

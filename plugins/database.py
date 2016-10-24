@@ -16,7 +16,6 @@ def check_dbs():
 def get_user_details(uname):
 	db = plyvel.DB(user_db)
 	tmp=db.get(uname.encode('utf-8'))
-	print(uname,tmp)
 	db.close()
 	if tmp == None:
 		return tmp
@@ -64,17 +63,32 @@ def getu_info(msg,orgmsg):
 def setu_info(msg,orgmsg):
 	try:
 		user = msg[1]
+		subdic = msg[2]
 	except IndexError:
 		return None
+	ud = get_user_details(user)
+	if udb == None:
+		ud={}
+		print("Index %(ind)s not found in user %(user)s. Creating..." % {'ind':subdic,'user':user})
 	return None
 
 @R.add(_("parseyaml"),"oncommand")
 def parse_yaml(msg,orgmsg):
 	try:
 		user = msg[1]
+		yml = orgmsg["body"].split(" ",3)[3]
 	except IndexError:
 		return None
-	return None
+	try:
+		datamap = yaml.safe_load(yml)
+		ud = get_user_details(user)
+		if(ud == None):
+			ud={}
+		ud['data']=json.dump(datamap).encode('utf-8')
+		set_user_details(user,ud)
+		return _("Set user %s data by parse YAML successfully.") % user
+	except yaml.parser.ParserError as e:
+		return "%s" % e
 
 plv = pluginmgr.plgmap["privilage"]
 plv.set_priv("setuinfo",2)
