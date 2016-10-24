@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#/usr/bin/python3
 import plyvel,os
 import config
 m_conf=config.get_plgconf("database")
@@ -23,7 +23,6 @@ def get_user_details(uname):
 		return json.loads(tmp.decode('utf-8'))
 def set_user_details(uname,datas):
 	db = plyvel.DB(user_db)
-	print(uname,datas)
 	res = db.put(uname.encode('utf-8'),json.dumps(datas).encode('utf-8'))
 	db.close()
 	return res
@@ -81,14 +80,14 @@ def parse_yaml(msg,orgmsg):
 		return None
 	try:
 		datamap = yaml.safe_load(yml)
-		ud = get_user_details(user)
-		if(ud == None):
-			ud={}
-		ud['data']=json.dump(datamap).encode('utf-8')
-		set_user_details(user,ud)
-		return _("Set user %s data by parse YAML successfully.") % user
-	except yaml.parser.ParserError as e:
+	except Exception as e:
 		return "%s" % e
+	ud = get_user_details(user)
+	if(ud == None):
+		ud={}
+	ud['data']=datamap
+	set_user_details(user,ud)
+	return _("Set user %s data by parse YAML successfully.") % user
 
 plv = pluginmgr.plgmap["privilage"]
 plv.set_priv("setuinfo",2)
