@@ -13,6 +13,7 @@ user_db = os.getcwd()+m_conf["user_path"]
 
 def check_dbs():
 	plyvel.DB(user_db, create_if_missing=True)
+
 def get_user_details(uname):
 	db = plyvel.DB(user_db)
 	tmp=db.get(uname.encode('utf-8'))
@@ -38,13 +39,11 @@ def getu_info(msg,orgmsg):
 		return None
 	udb = get_user_details(user)
 	if udb == None:
-		return _("Index %(ind)s not found in user %(user)s") % {'ind':subdic,'user':user}
-	if not user in udb:
-		if orgmsg['from'].bare+"/"+user in udb:
-			user = orgmsg['from'].bare+"/"+user
-		else:
+		udb = get_user_details(orgmsg['from'].bare+"/"+user)
+		user = orgmsg['from'].bare+"/"+user
+		if(udb == None):
 			return _("User: %(user)s not found in database.") % {'user':user}
-	tmpdic = udb[user]
+	tmpdic = udb[subdic]
 	last_ind = ""
 	for i in range(0,len(msg-3)):
 		if msg[i+2] in tmpdic:
@@ -62,13 +61,28 @@ def getu_info(msg,orgmsg):
 def setu_info(msg,orgmsg):
 	try:
 		user = msg[1]
-		subdic = msg[2]
+		value = msg[2]
 	except IndexError:
 		return None
 	ud = get_user_details(user)
 	if udb == None:
-		ud={}
-		print("Index %(ind)s not found in user %(user)s. Creating..." % {'ind':subdic,'user':user})
+		User %(user)s not found.
+	tmpdic = udb[user]
+	last_ind = ""
+	for i in range(0,len(msg-3)):
+		if msg[i+2] in tmpdic:
+			tmpdic = tmpdic[msg[i+2]]
+			last_ind = msg[i+2]
+	if isinstance(tmpdic,dict):
+		res = []
+		for k in tmpdic:
+			res.append(k)
+		return _("In %(dict)s has %(info)s") % {'dict':last_ind,'info':res} + _(" Please give more specific details.")
+	else:
+		operation = "udb[user]"
+		for i in range(0,len(msg-3)):
+			operation += "[%s]" % msg[i+2]
+		operation += " = "
 	return None
 
 @R.add(_("parseyaml"),"oncommand")
@@ -89,8 +103,36 @@ def parse_yaml(msg,orgmsg):
 	set_user_details(user,ud)
 	return _("Set user %s data by parse YAML successfully.") % user
 
+@R.add(_("dumpyaml"),"oncommand")
+def dump_yaml(msg,orgmsg):
+	try:
+		user = msg[1]
+		subdict = msg[2]
+	except IndexError:
+		return None
+	udb = get_user_details(user)
+	if udb == None:
+		return _("Index %(ind)s not found in user %(user)s") % {'ind':subdic,'user':user}
+	tmpdic = udb[user]
+	last_ind = ""
+	for i in range(0,len(msg-3)):
+		if msg[i+2] in tmpdic:
+			tmpdic = tmpdic[msg[i+2]]
+			last_ind = msg[i+2]
+	if isinstance(tmpdic,dict):
+		return yaml.dump(tmpdic)
+
+check_dbs()
+
 plv = pluginmgr.plgmap["privilage"]
 plv.set_priv("setuinfo",2)
 plv.set_priv("getuinfo",2)
 plv.set_priv("parseyaml",2)
-check_dbs()
+plv.set_priv("dumpyaml",2)
+
+R.set_help("database",_("""Database plugin usage:
+/getuinfo <USER NAME> <FIRST CATALOGUE> <...>
+/setuinfo <USER NAME> <FIRST CATALOGUE> <...> <DATA>
+/parseyaml
+/dumpyaml
+"""))
