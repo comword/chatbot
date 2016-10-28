@@ -89,13 +89,32 @@ def cat_log(msg,orgmsg):
 		res += line
 	return res
 
+@R.add(_("setignore"),"oncommand")
+def set_ignore(msg,orgmsg):
+	if msg['from'].bare in log_flag:
+		if(log_flag[msg['from'].bare]["logging"] == True):
+			try:
+				cmd = msg[1]
+			except IndexError:
+				log_flag[msg['from'].bare]["ignore_char"] = ''
+				return _("Ignore character removed successfully.")
+			if(len(cmd) == 1):
+				log_flag[msg['from'].bare]["ignore_char"] = cmd
+			else:
+				return _("The length of ignore character should be one.")
+			return _("Set ignore character to %s successfully.") % cmd
+	return _("This session is not being logged.")		
+			
+
+
 @R.add("proclog","onmessage")
 def proc_log(cla,msg):
 	if msg['from'].bare in log_flag:
 		if(log_flag[msg['from'].bare]["logging"] == True):
-			log_flag[msg['from'].bare]["file"].write(time.strftime("%H:%M:%S", time.localtime())+" "+msg['mucnick']+": "+msg["body"]+"\n")
-		else:
-			pass
+			if(log_flag[msg['from'].bare]["ignore_char"] == ''):
+				log_flag[msg['from'].bare]["file"].write(time.strftime("%H:%M:%S", time.localtime())+" "+msg['mucnick']+": "+msg["body"]+"\n")
+			elif(msg["body"].find(log_flag[msg['from'].bare]["ignore_char"]) == -1):
+				log_flag[msg['from'].bare]["file"].write(time.strftime("%H:%M:%S", time.localtime())+" "+msg['mucnick']+": "+msg["body"]+"\n")
 
 def fliter_command(cmd):
 	cmd = cmd.replace('/',"")
@@ -122,6 +141,7 @@ plv.set_priv("pauselog",2)
 plv.set_priv("resumelog",2)
 plv.set_priv("rmlog",0)
 plv.set_priv("lslog",2)
+plv.set_priv("setignore",2)
 
 R.set_help("logg",_("""Log bot usage:
 /startlog	Start a new log session.
@@ -131,4 +151,5 @@ R.set_help("logg",_("""Log bot usage:
 /lslog	List all logs.
 /catlog <LOGNAME>	Show log.
 /rmlog <LOGNAME>	Remove log.
+/setignore <IGNORE CHAR> A message started with this character won't be included in log. Leave second parameter to empty to accept all message.
 """))
