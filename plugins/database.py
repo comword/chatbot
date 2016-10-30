@@ -66,7 +66,7 @@ def setu_info(msg,orgmsg):
 		return None
 	ud = get_user_details(user)
 	if udb == None:
-		User %(user)s not found.
+		return _("User %(user)s not found.") % {'user':user}
 	tmpdic = udb[user]
 	last_ind = ""
 	for i in range(0,len(msg-3)):

@@ -24,6 +24,7 @@ def start_log(msg,orgmsg):
 		return _("This session is being logged.")
 	else:
 		log_flag[orgmsg['from'].bare] = {}
+		log_flag[orgmsg['from'].bare]['ignore_char'] = ''
 		log_flag[orgmsg['from'].bare]["file"] = open(log_path+"/"+time.strftime("%Y%m%d%H%M%S", time.localtime())+orgmsg['from'].bare.split('@')[0]+".log",'w')
 		log_flag[orgmsg['from'].bare]["logging"] = True
 		log_flag[orgmsg['from'].bare]["sttime"] = time.localtime()
@@ -91,15 +92,21 @@ def cat_log(msg,orgmsg):
 
 @R.add(_("setignore"),"oncommand")
 def set_ignore(msg,orgmsg):
-	if msg['from'].bare in log_flag:
-		if(log_flag[msg['from'].bare]["logging"] == True):
+	if orgmsg['from'].bare in log_flag:
+		if(log_flag[orgmsg['from'].bare]["logging"] == True):
 			try:
 				cmd = msg[1]
 			except IndexError:
-				log_flag[msg['from'].bare]["ignore_char"] = ''
+				log_flag[orgmsg['from'].bare]["ignore_char"] = ''
 				return _("Ignore character removed successfully.")
 			if(len(cmd) == 1):
-				log_flag[msg['from'].bare]["ignore_char"] = cmd
+				log_flag[orgmsg['from'].bare]["ignore_char"] = cmd
+			elif not (cmd.find('`') == -1):
+				chars = cmd.split('`')
+				for i in chars:
+					if len(i)>1:
+						return _("The length of each ignore character should be one.")
+				log_flag[orgmsg['from'].bare]["ignore_char"] = cmd
 			else:
 				return _("The length of ignore character should be one.")
 			return _("Set ignore character to %s successfully.") % cmd
@@ -111,9 +118,7 @@ def set_ignore(msg,orgmsg):
 def proc_log(cla,msg):
 	if msg['from'].bare in log_flag:
 		if(log_flag[msg['from'].bare]["logging"] == True):
-			if(log_flag[msg['from'].bare]["ignore_char"] == ''):
-				log_flag[msg['from'].bare]["file"].write(time.strftime("%H:%M:%S", time.localtime())+" "+msg['mucnick']+": "+msg["body"]+"\n")
-			elif(msg["body"].find(log_flag[msg['from'].bare]["ignore_char"]) == -1):
+			if(check_ign(log_flag[msg['from'].bare]["ignore_char"],msg["body"])):
 				log_flag[msg['from'].bare]["file"].write(time.strftime("%H:%M:%S", time.localtime())+" "+msg['mucnick']+": "+msg["body"]+"\n")
 
 def fliter_command(cmd):
@@ -130,6 +135,23 @@ def fliter_command(cmd):
 	cmd = cmd.replace('$',"")
 	cmd = cmd.replace('*',"")
 	return cmd
+
+def check_ign(ignore_str,msg):
+	if(ignore_str == ''):
+		return True
+	if(ignore_str.find('`') == -1 and len(ignore_str) == 1):
+		if(msg.find(ignore_str) == -1):
+			return True
+		elif(msg.find(ignore_str) >= 2):
+			return True
+		return False
+	if not (ignore_str.find('`') == -1):
+		chars = ignore_str.split('`')
+		for i in chars:
+			if(msg.find(i) >= 0 and msg.find(i) < 2):
+				return False
+		return True
+	return True
 
 if (check_log_dir() == False):
 	print (_("Log directory not exist, creating..."))
@@ -151,5 +173,5 @@ R.set_help("logg",_("""Log bot usage:
 /lslog	List all logs.
 /catlog <LOGNAME>	Show log.
 /rmlog <LOGNAME>	Remove log.
-/setignore <IGNORE CHAR> A message started with this character won't be included in log. Leave second parameter to empty to accept all message.
+/setignore <IGNORE CHAR> A message started with this character won't be included in log. Leave second parameter to empty to accept all message. IGNORE CHAR format should be separated by ` e.g: (`{`< , then ( { < will be ignored.
 """))

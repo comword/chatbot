@@ -61,8 +61,12 @@ def check_priv(cmd,username):
 			ud = dict()
 			ud["Privilage"] = 60
 			pluginmgr.plgmap["database"].set_user_details(username,ud)
-		if ud["Privilage"]<priv:
-			priv = ud["Privilage"]
+		if "Privilage" in ud:
+			if ud["Privilage"]<priv:
+				priv = ud["Privilage"]
+		else:
+			ud["Privilage"] = 60
+			pluginmgr.plgmap["database"].set_user_details(username,ud)
 		if (priv<=priv_map[cmd]):
 			return True
 		else:
