@@ -16,7 +16,7 @@ def check_dbs():
 
 def get_user_details(uname):
 	db = plyvel.DB(user_db)
-	tmp=db.get(uname.encode('utf-8'))
+	tmp = db.get(uname.encode('utf-8'))
 	db.close()
 	if tmp == None:
 		return tmp
@@ -44,11 +44,11 @@ def getu_info(msg,orgmsg):
 		if(udb == None):
 			return _("User: %(user)s not found in database.") % {'user':user}
 	tmpdic = udb[subdic]
-	last_ind = ""
-	for i in range(0,len(msg-3)):
-		if msg[i+2] in tmpdic:
-			tmpdic = tmpdic[msg[i+2]]
-			last_ind = msg[i+2]
+	last_ind = subdic
+	for i in range(0,len(msg)-3):
+		if msg[i+3] in tmpdic:
+			tmpdic = tmpdic[msg[i+3]]
+			last_ind = msg[i+3]
 	if isinstance(tmpdic,dict):
 		res = []
 		for k in tmpdic:
@@ -61,15 +61,19 @@ def getu_info(msg,orgmsg):
 def setu_info(msg,orgmsg):
 	try:
 		user = msg[1]
-		value = msg[2]
+		value = orgmsg['body'].split('|',1)[1]
+		msg = orgmsg['body'].split('|',1)[0].split(' ',1)[1].split(' ')
 	except IndexError:
 		return None
-	ud = get_user_details(user)
+	udb = get_user_details(user)
 	if udb == None:
-		return _("User %(user)s not found.") % {'user':user}
-	tmpdic = udb[user]
+		udb = get_user_details(orgmsg['from'].bare+"/"+user)
+		user = orgmsg['from'].bare+"/"+user
+		if(udb == None):
+			return _("User: %(user)s not found in database.") % {'user':user}
+	tmpdic = udb
 	last_ind = ""
-	for i in range(0,len(msg-3)):
+	for i in range(0,len(msg)-2):
 		if msg[i+2] in tmpdic:
 			tmpdic = tmpdic[msg[i+2]]
 			last_ind = msg[i+2]
@@ -79,11 +83,15 @@ def setu_info(msg,orgmsg):
 			res.append(k)
 		return _("In %(dict)s has %(info)s") % {'dict':last_ind,'info':res} + _(" Please give more specific details.")
 	else:
-		operation = "udb[user]"
-		for i in range(0,len(msg-3)):
-			operation += "[%s]" % msg[i+2]
+		operation = "udb"
+		for i in range(0,len(msg)-2):
+			operation += "[\"%s\"]" % msg[i+2]
 		operation += " = "
-	return None
+		operation += "\"%s\"" % value
+#		operation = operation.encode("utf-8")
+		exec(operation)
+		set_user_details(user,udb)
+	return operation
 
 @R.add(_("parseyaml"),"oncommand")
 def parse_yaml(msg,orgmsg):
@@ -98,7 +106,10 @@ def parse_yaml(msg,orgmsg):
 		return "%s" % e
 	ud = get_user_details(user)
 	if(ud == None):
-		ud={}
+		ud = get_user_details(orgmsg['from'].bare+"/"+user)
+		user = orgmsg['from'].bare+"/"+user
+		if(ud == None):
+			ud={}
 	ud['data']=datamap
 	set_user_details(user,ud)
 	return _("Set user %s data by parse YAML successfully.") % user
@@ -112,15 +123,39 @@ def dump_yaml(msg,orgmsg):
 		return None
 	udb = get_user_details(user)
 	if udb == None:
-		return _("Index %(ind)s not found in user %(user)s") % {'ind':subdic,'user':user}
-	tmpdic = udb[user]
-	last_ind = ""
-	for i in range(0,len(msg-3)):
-		if msg[i+2] in tmpdic:
-			tmpdic = tmpdic[msg[i+2]]
-			last_ind = msg[i+2]
+		udb = get_user_details(orgmsg['from'].bare+"/"+user)
+		user = orgmsg['from'].bare+"/"+user
+		if(udb == None):
+			return _("User: %(user)s not found in database.") % {'user':user}
+	if subdict in udb:
+		tmpdic = udb[subdict]
+	else:
+		return _("Index %(index)s cannot be found in user %(user)s.") % {'user':user,'index':subdict}
+	for i in range(0,len(msg)-3):
+		if msg[i+3] in tmpdic:
+			tmpdic = tmpdic[msg[i+3]]
 	if isinstance(tmpdic,dict):
-		return yaml.dump(tmpdic)
+		return yaml.dump(tmpdic,allow_unicode=True)
+	else:
+		return tmpdic
+
+@R.add(_("listuserdbk"),"oncommand")
+def list_userdbk(msg,orgmsg):
+	db = plyvel.DB(user_db)
+	res = list()
+	for key, value in db:
+		res.append(key.decode("utf-8"))
+	return res
+
+@R.add(_("deluserdbk"),"oncommand")
+def del_userdbk(msg,orgmsg):
+	try:
+		user = msg[1]
+	except IndexError:
+		return None
+	db = plyvel.DB(user_db)
+	db.delete(user.encode("utf-8"),sync = True)
+	return _("Delete user %s successfully.") % user
 
 check_dbs()
 
@@ -129,10 +164,14 @@ plv.set_priv("setuinfo",2)
 plv.set_priv("getuinfo",2)
 plv.set_priv("parseyaml",2)
 plv.set_priv("dumpyaml",2)
+plv.set_priv("listuserdbk",2)
+plv.set_priv("deluserdbk",2)
 
 R.set_help("database",_("""Database plugin usage:
 /getuinfo <USER NAME> <FIRST CATALOGUE> <...>
-/setuinfo <USER NAME> <FIRST CATALOGUE> <...> <DATA>
-/parseyaml
-/dumpyaml
+/setuinfo <USER NAME> <FIRST CATALOGUE> <...>|<DATA>
+/parseyaml <USER NAME> <YAML> This parse YAML document to <USER NAME>/data
+/dumpyaml <USER NAME> <FIRST CATALOGUE> <...>
+/listuserdbk List all user available in database.
+/deluserdbk Remove a user in database.
 """))
