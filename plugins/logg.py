@@ -4,6 +4,7 @@ import pluginmgr
 import config
 import time,os
 import lang
+import subprocess
 
 m_conf=config.get_plgconf("logg")
 R = main.R
@@ -18,6 +19,14 @@ def check_log_dir():
 	else:
 		return False
 
+def go_gzip(s,d):
+	if os.path.isfile(s):
+		cmd = 'cat %s | gzip > %s' % (s,d)
+		p = subprocess.Popen(cmd,shell=True, stdout=subprocess.PIPE)
+		return p.wait()
+	else:
+		return -1
+
 @R.add(_("startlog"),"oncommand")
 def start_log(msg,orgmsg):
 	if orgmsg['from'].bare in log_flag:
@@ -25,7 +34,8 @@ def start_log(msg,orgmsg):
 	else:
 		log_flag[orgmsg['from'].bare] = {}
 		log_flag[orgmsg['from'].bare]['ignore_char'] = ''
-		log_flag[orgmsg['from'].bare]["file"] = open(log_path+"/"+time.strftime("%Y%m%d%H%M%S", time.localtime())+orgmsg['from'].bare.split('@')[0]+".log",'w')
+		log_flag[orgmsg['from'].bare]["filename"] = log_path+"/"+time.strftime("%Y%m%d%H%M%S", time.localtime())+orgmsg['from'].bare.split('@')[0]+".log"
+		log_flag[orgmsg['from'].bare]["file"] = open(log_flag[orgmsg['from'].bare]["filename"],'w')
 		log_flag[orgmsg['from'].bare]["logging"] = True
 		log_flag[orgmsg['from'].bare]["sttime"] = time.localtime()
 		return _("A new log started at %(time)s")% {'time':time.strftime(ISOTIMEFORMAT, time.localtime())}
@@ -34,6 +44,8 @@ def start_log(msg,orgmsg):
 def stop_log(msg,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		log_flag[orgmsg['from'].bare]["file"].close()
+		go_gzip(log_flag[orgmsg['from'].bare]["filename"],log_flag[orgmsg['from'].bare]["filename"]+".gz")
+		os.remove(orgmsg['from'].bare]["filename"])
 		log_flag.pop(orgmsg['from'].bare)
 		return _("The log is stopped at %(time)s") % {'time':time.strftime(ISOTIMEFORMAT, time.localtime())}
 	else:
@@ -63,11 +75,17 @@ def resume_log(msg,orgmsg):
 
 @R.add(_("lslog"),"oncommand")
 def ls_log(msg,orgmsg):
-	tmp = os.popen('ls '+"."+m_conf["path"]+"|grep " + orgmsg['from'].bare.split('@',1)[0]).readlines()
+	if orgmsg['type'] in ('chat', 'normal'):
+		tmp = subprocess.Popen('ls '+"."+m_conf["path"]+"|grep gz",shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	else:
+		tmp = subprocess.Popen('ls '+"."+m_conf["path"]++"|grep gz"+"|grep " + orgmsg['from'].bare.split('@',1)[0],shell=True, stdout=subprocess.PIPE)
 	res = ""
-	for line in tmp:
-		res += line
+	for l in tmp.stdout.readlines():
+		res+=l.decode("utf-8")
+	if res=="":
+		return _("No available log to show.")
 	return res
+
 @R.add(_("rmlog"),"oncommand")
 def rm_log(msg,orgmsg):
 	try:
@@ -75,7 +93,20 @@ def rm_log(msg,orgmsg):
 		cmd = fliter_command(cmd)
 	except IndexError:
 		return None
-	
+	if orgmsg['type'] in ('chat', 'normal'):
+		tmp = subprocess.Popen('rm -rf '+"."+m_conf["path"]+"/"+cmd,shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	else:
+		if(cmd.find(orgmsg['from'].bare.split('@',1)[0])==-1):
+			return _("No available log to remove.")
+		tmp = subprocess.Popen('rm -rf '+"."+m_conf["path"]+"/"+cmd,shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	res = ""
+	if not tmp.stderr == None:
+		for l in tmp.stderr.readlines():
+			res+=l.decode("utf-8")
+	else:
+		for l in tmp.stdout.readlines():
+			res+=l.decode("utf-8")
+	return res
 
 @R.add(_("catlog"),"oncommand")
 def cat_log(msg,orgmsg):
@@ -84,10 +115,14 @@ def cat_log(msg,orgmsg):
 		cmd = fliter_command(cmd)
 	except IndexError:
 		return None
-	tmp = os.popen('cat '+"."+m_conf["path"]+"/"+ cmd +" 2>&1").readlines()
+	tmp = subprocess.Popen('zcat '+"."+m_conf["path"]+"/"+ cmd,shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 	res = ""
-	for line in tmp:
-		res += line
+	if not tmp.stderr == None:
+		for l in tmp.stderr.readlines():
+			res+=l.decode("utf-8")
+	else:
+		for l in tmp.stdout.readlines():
+			res+=l.decode("utf-8")
 	return res
 
 @R.add(_("setignore"),"oncommand")
@@ -111,8 +146,6 @@ def set_ignore(msg,orgmsg):
 				return _("The length of ignore character should be one.")
 			return _("Set ignore character to %s successfully.") % cmd
 	return _("This session is not being logged.")		
-			
-
 
 @R.add("proclog","onmessage")
 def proc_log(cla,msg):
@@ -120,6 +153,7 @@ def proc_log(cla,msg):
 		if(log_flag[msg['from'].bare]["logging"] == True):
 			if(check_ign(log_flag[msg['from'].bare]["ignore_char"],msg["body"])):
 				log_flag[msg['from'].bare]["file"].write(time.strftime("%H:%M:%S", time.localtime())+" "+msg['mucnick']+": "+msg["body"]+"\n")
+				log_flag[msg['from'].bare]["file"].flush()
 
 def fliter_command(cmd):
 	cmd = cmd.replace('/',"")
@@ -134,6 +168,7 @@ def fliter_command(cmd):
 	cmd = cmd.replace('<',"")
 	cmd = cmd.replace('$',"")
 	cmd = cmd.replace('*',"")
+	cmd = cmd.replace('..',"")
 	return cmd
 
 def check_ign(ignore_str,msg):
