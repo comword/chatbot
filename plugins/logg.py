@@ -45,7 +45,7 @@ def stop_log(msg,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		log_flag[orgmsg['from'].bare]["file"].close()
 		go_gzip(log_flag[orgmsg['from'].bare]["filename"],log_flag[orgmsg['from'].bare]["filename"]+".gz")
-		os.remove(orgmsg['from'].bare]["filename"])
+		os.remove(log_flag[orgmsg['from'].bare]["filename"])
 		log_flag.pop(orgmsg['from'].bare)
 		return _("The log is stopped at %(time)s") % {'time':time.strftime(ISOTIMEFORMAT, time.localtime())}
 	else:
