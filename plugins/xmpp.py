@@ -38,14 +38,32 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			else:
 				self.plugin['xep_0045'].joinMUC(room["room"],room["nick"],wait=True)
 	def muc_message(self, msg):
-		nick = self.find_nick(msg["from"].bare)
-		if msg['mucnick'] != nick:
-			tofind = nick+": "
-			if not(msg['body'].find(tofind) == -1):
+#		nick = self.find_nick(msg["from"].bare)
+#		if msg['mucnick'] != nick:
+#			tofind = nick+": "
+#			if not(msg['body'].find(tofind) == -1):
+#				tim = self.check_time(msg['from'],False)
+#				if (tim[0]):
+#					subm = msg['body'][msg['body'].find(tofind):]
+#					res = self.proc_msg(subm,msg)
+#					if not(res == None):
+#						self.send_message(mto=msg['from'].bare,
+#				                      mbody="%s" % (res),
+#				                      mtype='groupchat')
+#					else:
+#						self.send_message(mto=msg['from'].bare,
+#		                          mbody=_("Type /help (plugin) to get help. Type /listplugins to list all plugins."),
+#		                          mtype='groupchat')
+#				elif not(tim[1] == ""):
+#					self.send_message(mto=msg['from'].bare,
+#				                      mbody="%s" % (tim[1]),
+#				                      mtype='groupchat')
+		f_ind = msg['body'].find('/')
+		if(f_ind != -1 and f_ind < 2):
+			if main.R.has_command(msg['body'].split("/",1)[1].split(' ',1)[0]) == 1 :
 				tim = self.check_time(msg['from'],False)
 				if (tim[0]):
-					subm = msg['body'][msg['body'].find(tofind):]
-					res = self.proc_msg(subm,msg)
+					res = self.proc_msg(msg["body"],msg)
 					if not(res == None):
 						self.send_message(mto=msg['from'].bare,
 				                      mbody="%s" % (res),

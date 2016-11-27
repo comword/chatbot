@@ -5,6 +5,7 @@ import config
 import time,os
 import lang
 import subprocess
+import gzip
 
 m_conf=config.get_plgconf("logg")
 R = main.R
@@ -26,6 +27,49 @@ def go_gzip(s,d):
 		return p.wait()
 	else:
 		return -1
+
+def mergegzfile(path,f_name_list, dest_f_name):
+	buf = ""
+	for i in f_name_list:
+		if not os.path.isfile(path+'/'+i):
+			return -1
+		with gzip.open(path+'/'+i, 'rb') as f:
+			buf += f.read()
+			buf += '\n'
+	with gzip.open(path+'/'+dest_f_name, 'wb') as f:
+		f.write(content)
+	return 0
+
+def mergelogperday(date, log_path):
+	#date %Y%m%d
+	if not os.path.isdir(log_path):
+		return -1
+	tmp = subprocess.Popen('ls '+log_path+"|grep gz",shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	res = list()
+	for l in tmp.stdout.readlines():
+		f_date = os.path.basename(l.decode("utf-8"))[0:8]
+		if f_date == date:
+			res.append(l.decode("utf-8"))
+	mergegzfile(log_path,res,tmp.stdout.readlines()[0])
+	return 0
+
+def tarlog_range(log_path, datefrom, dateto, filename):
+	if not os.path.isdir(log_path):
+		return -1
+	if orgmsg['type'] in ('chat', 'normal'):
+		tmp = subprocess.Popen('ls '+"."+m_conf["path"]+"|grep gz",shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	else:
+		tmp = subprocess.Popen('ls '+"."+m_conf["path"]+"|grep gz"+"|grep " + orgmsg['from'].bare.split('@',1)[0],shell=True, stdout=subprocess.PIPE)
+	command = 'tar -cvf '+filename+" -C " + log_path + ' '
+	for l in tmp.stdout.readlines():
+		f_date = os.path.basename(l.decode("utf-8"))[0:8]
+		if(f_date<=dateto) and (f_date>=datefrom):
+			command += l.decode("utf-8")
+	tmp = subprocess.Popen(command,shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	res = _("Compressed:\n")
+	for l in tmp.stdout.readlines():
+		res += l.decode("utf-8")
+	return res
 
 @R.add(_("startlog"),"oncommand")
 def start_log(msg,orgmsg):
@@ -78,7 +122,7 @@ def ls_log(msg,orgmsg):
 	if orgmsg['type'] in ('chat', 'normal'):
 		tmp = subprocess.Popen('ls '+"."+m_conf["path"]+"|grep gz",shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 	else:
-		tmp = subprocess.Popen('ls '+"."+m_conf["path"]++"|grep gz"+"|grep " + orgmsg['from'].bare.split('@',1)[0],shell=True, stdout=subprocess.PIPE)
+		tmp = subprocess.Popen('ls '+"."+m_conf["path"]+"|grep gz"+"|grep " + orgmsg['from'].bare.split('@',1)[0],shell=True, stdout=subprocess.PIPE)
 	res = ""
 	for l in tmp.stdout.readlines():
 		res+=l.decode("utf-8")
@@ -147,6 +191,19 @@ def set_ignore(msg,orgmsg):
 			return _("Set ignore character to %s successfully.") % cmd
 	return _("This session is not being logged.")		
 
+@R.add(_("tarfile"),"oncommand")
+def gen_file(msg,orgmsg):
+	try:
+		datefrom = msg[1]
+		dateto = msg[2]
+	except IndexError:
+		return None
+	try:
+		filename = msg[3]
+	except IndexError:
+		filename = log_path+"/"+time.strftime("%Y%m%d%H%M%S", time.localtime())+orgmsg['from'].bare.split('@')[0]+".tar"
+	return tarlog_range(log_path, datefrom, dateto, filename)
+
 @R.add("proclog","onmessage")
 def proc_log(cla,msg):
 	if msg['from'].bare in log_flag:
@@ -209,4 +266,5 @@ R.set_help("logg",_("""Log bot usage:
 /catlog <LOGNAME>	Show log.
 /rmlog <LOGNAME>	Remove log.
 /setignore <IGNORE CHAR> A message started with this character won't be included in log. Leave second parameter to empty to accept all message. IGNORE CHAR format should be separated by ` e.g: (`{`< , then ( { < will be ignored.
+/tarfile 
 """))

@@ -49,4 +49,16 @@ class R():
 			if not _(k)==k:
 				tmp[_(k)]=k
 		self.cmd_alias = tmp
-		
+
+	def has_command(self, cmd):
+		if cmd in self.cmd_alias:
+			if self.cmd_alias[cmd]==cmd:
+				return -1
+			elif self.cmd_alias[cmd] in self.command_map:
+				return 1
+			else:
+				return 0
+		elif cmd in self.command_map:
+			return 1
+		else:
+			return 0
