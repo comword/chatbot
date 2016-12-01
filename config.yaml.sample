@@ -8,6 +8,7 @@ plugins:
         - help
         - privilage
         - database
+        - library
         - logg
         - dicebot
     database:
@@ -32,3 +33,5 @@ plugins:
     languages:
         default: en_US
         locale: /locales/mo
+    library:
+        path: /libraries
