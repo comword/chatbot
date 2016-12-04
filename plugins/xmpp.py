@@ -18,6 +18,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 	def __init__(self, jid, password, roomlist):
 		sleekxmpp.ClientXMPP.__init__(self, jid, password)
 		self.roles = dict()
+		self.muc_jid = dict()
 		self.roomlist = roomlist
 		self.add_event_handler("message", self.message)
 		self.add_event_handler("session_start", self.start)
@@ -79,8 +80,11 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		for k in main.R.message_map:
 			main.R.message_map[k](self,msg)
 	def muc_presence(self, presence):
-		nick = presence['from']
-		self.roles[nick] = presence['muc']['role']
+		if(presence["muc"]["jid"].bare == None):
+			print(_("Warning: Cannot get real JID in mulituser chatroom, please check your room settings."))
+		else:
+			self.muc_jid[presence['from']] = presence["muc"]["jid"].bare
+		self.roles[presence['from']] = presence['muc']['role']
 	def message(self,msg):
 		if msg['type'] in ('chat', 'normal'):
 			tim = self.check_time(msg['from'],True)
