@@ -18,13 +18,21 @@ def load_lib():
 		m_dat = json.load(tmp)
 		tmp.close()
 		for item in m_dat:
-			if "id" in item:
-				m_id = item["id"]
-				if m_id in lib:
-					print(_("Duplicated item id %(m_id)s in file %(file)s.") % {'m_id':m_id,'file':a_file})
-					raise Exception({'m_id':m_id,'file':a_file})
-				else:
-					lib[m_id] = item
+			if "type" in item:
+				if not item["type"] in lib:
+					lib[item["type"]] = dict()
+				if "id" in item:
+					m_id = item["id"]
+					if m_id in lib[item["type"]]:
+						print(_("Duplicated item id %(m_id)s in file %(file)s, merging...") % {'m_id':m_id,'file':a_file})
+						lib[item["type"]][m_id] = merge_dicts(lib[item["type"]][m_id],item)
+#						print(lib[item["type"]][m_id])
+#						raise Exception({'m_id':m_id,'file':a_file})
+					else:
+						lib[item["type"]][m_id] = item
+			else:
+				print(_("Type tag not found in id %(m_id)s in file %(file)s.") % {'m_id':m_id,'file':a_file})
+				raise Exception({'m_id':m_id,'file':a_file})
 
 def lookup_lib_byid(obj_type,obj_id):
 	if obj_id in lib:
@@ -32,4 +40,10 @@ def lookup_lib_byid(obj_type,obj_id):
 	else:
 		return None
 
-#load_lib()
+def merge_dicts(*dict_args):
+	result = dict()
+	for dic in dict_args:
+		result.update(dic)
+	return result
+
+load_lib()
