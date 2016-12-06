@@ -53,10 +53,10 @@ def mergelogperday(date, log_path):
 	mergegzfile(log_path,res,tmp.stdout.readlines()[0])
 	return 0
 
-def tarlog_range(log_path, datefrom, dateto, filename):
+def tarlog_range(orgmsg,log_path, datefrom, dateto, filename):
 	if not os.path.isdir(log_path):
 		return -1
-	if orgmsg['type'] in ('chat', 'normal'):
+	if orgmsg["type"] in ('chat', 'normal'):
 		tmp = subprocess.Popen('ls '+"."+m_conf["path"]+"|grep gz",shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 	else:
 		tmp = subprocess.Popen('ls '+"."+m_conf["path"]+"|grep gz"+"|grep " + orgmsg['from'].bare.split('@',1)[0],shell=True, stdout=subprocess.PIPE)
@@ -64,7 +64,7 @@ def tarlog_range(log_path, datefrom, dateto, filename):
 	for l in tmp.stdout.readlines():
 		f_date = os.path.basename(l.decode("utf-8"))[0:8]
 		if(f_date<=dateto) and (f_date>=datefrom):
-			command += l.decode("utf-8")
+			command += l.decode("utf-8")[:-1] + ' '
 	tmp = subprocess.Popen(command,shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 	res = _("Compressed:\n")
 	for l in tmp.stdout.readlines():
@@ -202,7 +202,7 @@ def gen_file(msg,orgmsg):
 		filename = msg[3]
 	except IndexError:
 		filename = log_path+"/"+time.strftime("%Y%m%d%H%M%S", time.localtime())+orgmsg['from'].bare.split('@')[0]+".tar"
-	return tarlog_range(log_path, datefrom, dateto, filename)
+	return tarlog_range(orgmsg,log_path, datefrom, dateto, filename)
 
 @R.add("proclog","onmessage")
 def proc_log(cla,msg):
