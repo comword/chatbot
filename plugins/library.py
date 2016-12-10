@@ -34,11 +34,25 @@ def load_lib():
 				print(_("Type tag not found in id %(m_id)s in file %(file)s.") % {'m_id':m_id,'file':a_file})
 				raise Exception({'m_id':m_id,'file':a_file})
 
-def lookup_lib_byid(obj_type,obj_id):
+def get_lib_bytype(obj_type):
+	if obj_type in lib:
+		return lib[obj_type]
+	else:
+		return None
+
+def get_obj_byid(obj_id,lib):
 	if obj_id in lib:
 		return lib[obj_id]
 	else:
 		return None
+
+def upd_user_info(usr_info,obj_dire):
+	#already [data]
+	if not obj_dire in usr_info:
+		return usr_info #do nothing
+	for it in usr_info[obj_dire]:
+		if not it.find('/')==-1:
+			pass
 
 def merge_dicts(*dict_args):
 	result = dict()
