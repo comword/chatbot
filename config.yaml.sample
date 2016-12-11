@@ -11,6 +11,7 @@ plugins:
         - library
         - logg
         - dicebot
+#        - personal/xyz
     database:
         user_path: /datas/users.db
     xmpp:

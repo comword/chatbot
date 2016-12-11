@@ -1,3 +1,4 @@
+#!/usr/bin/env /usr/bin/python3
 import lang
 class R():
 	def __init__(self):

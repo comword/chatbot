@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env /usr/bin/python3
 import math,random
 import main
 import lang

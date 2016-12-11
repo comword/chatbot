@@ -1,4 +1,4 @@
-#/usr/bin/python3
+#!/usr/bin/env /usr/bin/python3
 import plyvel,os
 import config
 m_conf=config.get_plgconf("database")

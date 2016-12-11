@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env /usr/bin/python3
 import main
 import pluginmgr
 R = main.R

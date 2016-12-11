@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env /usr/bin/python3
 import sys,os,imp
 import config
 import main
@@ -9,14 +9,14 @@ plugindir=os.getcwd()+config.get_plgconf("path")
 sys.path.append(plugindir)
 plgmap={}
 
-def list_plugins():
-	tmpl=[]
-	for parent,dirnames,filenames in os.walk(plugindir):
-		for f in filenames:
-			ext = f[f.index("."):]
-			if(ext == ".py" or ext == ".so" or ext == ".pyc"):
-				tmpl.append(f)
-		return tmpl
+#def list_plugins():
+#	tmpl=[]
+#	for parent,dirnames,filenames in os.walk(plugindir):
+#		for f in filenames:
+#			ext = f[f.index("."):]
+#			if(ext == ".py" or ext == ".so" or ext == ".pyc"):
+#				tmpl.append(f)
+#		return tmpl
 
 def load_plugin(plugindir,mod_name):
 	f, filename, description = imp.find_module(mod_name,[plugindir])
@@ -33,4 +33,9 @@ def list_plugin(msg,orgmsg):
 
 plg_list=config.get_plgconf("loading")
 for p in plg_list:
-	plgmap[p]=load_plugin(plugindir,p)
+	if p.find('/') == -1:
+		plgmap[p]=load_plugin(plugindir,p)
+	else:
+		subdir = p.split('/')[0]
+		filename = p.split('/')[1]
+		plgmap[p]=load_plugin(plugindir+"/"+subdir,filename)

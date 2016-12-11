@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env /usr/bin/python3
 import sleekxmpp
 import config
 import main
@@ -19,6 +19,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		sleekxmpp.ClientXMPP.__init__(self, jid, password)
 		self.roles = dict()
 		self.muc_jid = dict()
+		self.reply_to_nonmuc = True
 		self.roomlist = roomlist
 		self.add_event_handler("message", self.message)
 		self.add_event_handler("session_start", self.start)
@@ -39,26 +40,6 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			else:
 				self.plugin['xep_0045'].joinMUC(room["room"],room["nick"],wait=True)
 	def muc_message(self, msg):
-#		nick = self.find_nick(msg["from"].bare)
-#		if msg['mucnick'] != nick:
-#			tofind = nick+": "
-#			if not(msg['body'].find(tofind) == -1):
-#				tim = self.check_time(msg['from'],False)
-#				if (tim[0]):
-#					subm = msg['body'][msg['body'].find(tofind):]
-#					res = self.proc_msg(subm,msg)
-#					if not(res == None):
-#						self.send_message(mto=msg['from'].bare,
-#				                      mbody="%s" % (res),
-#				                      mtype='groupchat')
-#					else:
-#						self.send_message(mto=msg['from'].bare,
-#		                          mbody=_("Type /help (plugin) to get help. Type /listplugins to list all plugins."),
-#		                          mtype='groupchat')
-#				elif not(tim[1] == ""):
-#					self.send_message(mto=msg['from'].bare,
-#				                      mbody="%s" % (tim[1]),
-#				                      mtype='groupchat')
 		f_ind = msg['body'].find('/')
 		if(f_ind != -1 and f_ind < 2):
 			if main.R.has_command(msg['body'].split("/",1)[1].split(' ',1)[0]) == 1 :
@@ -86,24 +67,25 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			self.muc_jid[presence['from']] = presence["muc"]["jid"].bare
 		self.roles[presence['from']] = presence['muc']['role']
 	def message(self,msg):
-		if msg['type'] in ('chat', 'normal'):
-			tim = self.check_time(msg['from'],True)
-			if (tim[0]):
-				res = self.proc_msg(msg["body"],msg)
-				if not(res == None):
-					self.send_message(mto=msg['from'].bare,
-		                          mbody="%s" % (res),
-		                          mtype='chat')
-				else:
-					self.send_message(mto=msg['from'].bare,
-		                          mbody=_("Type /help (plugin) to get help. Type /listplugins to list all plugins."),
-		                          mtype='chat')
-			elif not(tim[1] == ""):
-					self.send_message(mto=msg['from'].bare,
-		                          mbody="%s" % (tim[1]),
-		                          mtype='chat')
-			for k in main.R.message_map:
-				main.R.message_map[k](self,msg)
+		if self.reply_to_nonmuc:
+			if msg['type'] in ('chat', 'normal'):
+				tim = self.check_time(msg['from'],True)
+				if (tim[0]):
+					res = self.proc_msg(msg["body"],msg)
+					if not(res == None):
+						self.send_message(mto=msg['from'].bare,
+				                  mbody="%s" % (res),
+				                  mtype='chat')
+					else:
+						self.send_message(mto=msg['from'].bare,
+				                  mbody=_("Type /help (plugin) to get help. Type /listplugins to list all plugins."),
+				                  mtype='chat')
+				elif not(tim[1] == ""):
+						self.send_message(mto=msg['from'].bare,
+				                  mbody="%s" % (tim[1]),
+				                  mtype='chat')
+				for k in main.R.message_map:
+					main.R.message_map[k](self,msg)
 	def proc_msg(self,subm,msg):
 		if msg['from'].bare in lang.lang_map:
 			lang.chg_loc(lang.lang_map[msg['from'].bare])
@@ -149,9 +131,20 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			if room == it["room"]:
 				return it["nick"]
 		return False
-
-m_bot = MUCBot(m_conf["jid"], m_conf["password"], m_conf["chatrooms"])
+	def handle_probe(self, presence):
+		sender = presence['from']
+		if sender.bare == self.jid:
+			self.reply_to_nonmuc = False
+		self.sendPresence(pto=sender, pstatus="", pshow="")
+if "resource" in m_conf:
+	m_bot = MUCBot(m_conf["jid"]+'/'+m_conf["resource"], m_conf["password"], m_conf["chatrooms"])
+else:
+	m_bot = MUCBot(m_conf["jid"], m_conf["password"], m_conf["chatrooms"])
 
 def start_xmpp():
 	if m_bot.connect():
+		m_bot.auto_authorize = False
+		m_bot.makePresence(pfrom=m_conf["jid"], pstatus='', pshow='')
+#check whether exist another user.
+		m_bot.sendPresence(pto=m_conf["jid"], ptype='probe')
 		return m_bot

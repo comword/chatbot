@@ -1,4 +1,4 @@
-#/usr/bin/python3
+#!/usr/bin/env /usr/bin/python3
 import os
 import config
 m_conf=config.get_plgconf("library")
@@ -34,25 +34,44 @@ def load_lib():
 				print(_("Type tag not found in id %(m_id)s in file %(file)s.") % {'m_id':m_id,'file':a_file})
 				raise Exception({'m_id':m_id,'file':a_file})
 
-def get_lib_bytype(obj_type):
-	if obj_type in lib:
-		return lib[obj_type]
-	else:
-		return None
-
-def get_obj_byid(obj_id,lib):
-	if obj_id in lib:
-		return lib[obj_id]
-	else:
-		return None
-
 def upd_user_info(usr_info,obj_dire):
 	#already [data]
 	if not obj_dire in usr_info:
 		return usr_info #do nothing
 	for it in usr_info[obj_dire]:
-		if not it.find('/')==-1:
-			pass
+#This part get all parts from user data.
+		if not isinstance(it,str):
+			print(_("Bad part: "))
+			print(it)
+			continue
+		user_part = usr_info[obj_dire][it]
+		iter_user_part(usr_info,it,user_part)
+		
+def iter_user_part(usr_info,path,it):
+	if isinstance(it,list):
+		for index,item in enumerate(it):
+			if isinstance(item,str):
+				if item.find('/') == -1:
+					print(_("Bad object: %s.") % item)
+					continue
+				n_id = item.split('/')[1]
+				n_type = item.split('/')[0]
+				if not n_type in lib:
+					print(_("Type %(type)s not found of object %(obj)s.") % {'type':n_type,'obj':item})
+					continue
+				if not n_id in lib[n_type]:
+					print(_("ID %(ID)s not found in type %(type)s of object %(obj)s.") % {'ID':n_ID,'type':n_type,'obj':item})
+					continue
+				des_obj = lib[n_type][n_id]
+				
+			elif isinstance(item,dict):
+				for key in item:
+					iter_user_part(usr_info,path+'/'+index+'/'+key,it[key])
+		return 1
+	elif isinstance(it,dict):
+		for key in it:
+			iter_user_part(usr_info,path+'/'+key,it[key])
+		return 1
 
 def merge_dicts(*dict_args):
 	result = dict()
