@@ -3,6 +3,7 @@
 datas/
 logs/
 plugins/personal/
+libraries/personal/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,16 +1,17 @@
 # xmppbot
+
 This is a extendable bot with xmpp protocol.
 
 # install
+
 pip3 install PyYAML
 
 pip3 install sleekxmpp
 
 pip3 install plyvel
 
-pip3 install babel
-
 # make translation
+
 pygettext3 -o xmppbot.pot -p locales *.py plugins/*.py
 
 msginit -l en_US -o locales/po/en_US.po -i locales/xmppbot.pot

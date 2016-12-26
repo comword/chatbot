@@ -33,7 +33,7 @@ def go_dice(msg,orgmsg):
 	if(dcmd.split('d',1)[0].isdigit() and dcmd.split('d',1)[1].isdigit()):
 		cont = int(dcmd.split('d',1)[0])
 		rng = int(dcmd.split('d',1)[1])
-		if(cont>100 or rng>100 or rng < 1):
+		if(cont>100 or rng>1000 or rng < 1):
 			return None
 		res=[]
 		ressum=0
@@ -53,7 +53,7 @@ R.set_help("dicebot",_("""Dice bot usage:
 /dice [COUNT]d[LIMIT]|[ADDITION] [DESCRIPTION]
 Randomize a sort of dices and add them up.
 [COUNT] should be less than 100.
-[LIMIT] should be less than 100.
+[LIMIT] should be less than 1000.
 Examples:
 /dice 2d6
 Result: [1, 2]+0=3

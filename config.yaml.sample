@@ -36,4 +36,5 @@ plugins:
         locale: /locales/mo
     library:
         path: /libraries
-        def_obj_dir: inventory
+        def_obj_enum: Items_enum
+        def_obj_dir: Inventory

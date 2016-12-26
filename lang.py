@@ -1,7 +1,6 @@
 #!/usr/bin/env /usr/bin/python3
 import gettext
 import locale
-import babel
 import os
 import config
 import main
@@ -24,13 +23,12 @@ import main
 R = main.R
 @R.add(_("listlangs"),"oncommand")
 def list_langs(msg,orgmsg):
-	messagefiles = gettext.find(appname, localedir=os.getcwd()+c_locale["locale"]+"/" ,languages=babel.Locale('en').languages.keys(),all=True)
-	messagefiles.sort()
-	languages = [path.split('/')[-3] for path in messagefiles]
-	#langlist = zip(languages, [babel.Locale.parse(lang).display_name for lang in languages])
+	file_list = [os.path.join(dp, f) for dp, dn, filenames in os.walk(os.getcwd()+c_locale["locale"]+"/") for f in filenames if os.path.splitext(f)[1] == '.mo']
+	file_list.sort()
+	languages = [path.split('/')[-3] for path in file_list]
 	return languages
 
-@R.add(_("changelocale"),"oncommand")
+@R.add(_("setlocale"),"oncommand")
 def change_locale(msg,orgmsg):
 	try:
 		la = msg[1]
