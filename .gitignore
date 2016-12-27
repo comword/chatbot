@@ -4,6 +4,8 @@ datas/
 logs/
 plugins/personal/
 libraries/personal/
+locales/json/*.py
+locales/mo/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
