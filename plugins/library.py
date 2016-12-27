@@ -12,6 +12,8 @@ import uuid
 libpath = os.getcwd()+m_conf["path"]
 lib = dict()
 pcpy = ["name","id","type"]
+c_enum = m_conf["def_obj_enum"]
+c_inve = m_conf["def_obj_dir"]
 
 def load_lib():
 	file_list = [os.path.join(dp, f) for dp, dn, filenames in os.walk(libpath) for f in filenames if os.path.splitext(f)[1] == '.json']
@@ -59,13 +61,17 @@ def check_user_obj_enum(usr_info,enum_d):
 def merge_dicts(*dict_args):
 	result = dict()
 	for dic in dict_args:
-		result.update(dic)
+		if isinstance(dic,dict):
+			result.update(dic)
+		else:
+			print(_("Wrong instance. %s")%dic)
+			return None
 	return result
 
 def part_copy(it,obj,li):
 	for k in li:
 		it[k] = obj[k]
-	it["UUID"] = uuid.uuid4()
+	it["UUID"] = str(uuid.uuid4())
 	return it
 
 def get_des_obj(item):
@@ -108,34 +114,36 @@ def write_back(userinfo,path,info):
 	path_sep = path.split('/')
 	comm = "userinfo"
 	for p in path_sep:
-		comm += "[%s]" % p
+		if p.isdigit():
+			comm += "[%s]" % p
+		else:
+			comm += "['%s']" % p
 #	if eval('"pre-name" in ' + comm):
 #		exec(comm+".pop('pre-name')") # remove pre-name
-	tmp = merge_dicts([comm,info])
+	exec('global tmpdic; tmpdic = ' + comm)
+	tmp = merge_dicts(tmpdic,info)
 	comm += " = tmp"
 	exec(comm)
 
 def refine_inventory(usr_dic):
-	c_enum = m_conf["def_obj_enum"]
-	c_inve = m_conf["def_obj_dir"]
 	for it in usr_dic[c_inve]:
-		iter_check_dic(usr_dic,usr_dic[c_inve][it],it)
+		if iter_check_dic(usr_dic,usr_dic[c_inve][it],it) != 0:
+			return -1
 
 def get_item_enum_by_uuid(UUID,dic):
 	if not isinstance(dic,list):
 		return None
 	for i in dic:
-		if isinstance(dic[i],dict):
-			if "UUID" in dic[i]:
-				if dic[i]["UUID"] == UUID:
-					return dic[i]
+		if isinstance(i,dict):
+			if "UUID" in i:
+				if i["UUID"] == UUID:
+					return i
 	return None
 
 def iter_check_dic(u_dic,it,path):
-	c_enum = m_conf["def_obj_enum"]
 	if isinstance(it,list):
 		for index,item in enumerate(it):
-			res = iter_check_dic(u_dic,item,path+"/"+index)
+			res = iter_check_dic(u_dic,item,path+"/"+str(index))
 			if res != 0:
 				return -1
 		return 0
@@ -147,7 +155,7 @@ def iter_check_dic(u_dic,it,path):
 					return -1
 				it["UUID"] = u_dic[c_enum][it["index"]]["UUID"]
 				it.pop("index")
-				write_back(u_dic,path,it)
+				write_back(u_dic[c_inve],path,it)
 		elif "UUID" in it:#have a check
 			tmp = get_item_enum_by_uuid(it["UUID"],u_dic[c_enum])
 			if tmp == None:
@@ -159,6 +167,50 @@ def iter_check_dic(u_dic,it,path):
 				if res != 0:
 					return -1
 		return 0
+	return 0
+
+def iter_get_it_byuuid(u_dic,it,path,uuid):
+	if isinstance(it,list):
+		for index,item in enumerate(it):
+			res = iter_get_it_byuuid(u_dic,item,path+"/"+str(index),uuid)
+			if isinstance(res,dict):
+				if "UUID" in res:
+					if res["UUID"] == uuid:
+						return res
+		return None
+	elif isinstance(it,dict):
+		if "UUID" in it:#have a check
+			tmp = get_item_enum_by_uuid(it["UUID"],u_dic[c_enum])
+			if tmp == None:
+				print(_("UUID %(UUID)s required by inventory not found in list.") % {"UUID":it["UUID"]})
+				return -1
+			if "UUID" in it:
+				if it["UUID"] == uuid:
+					return it
+		else:
+			for k in it:
+				res = iter_get_it_byuuid(u_dic,it[k],path+"/"+k,uuid)
+				if isinstance(res,dict):
+					if "UUID" in res:
+						if res["UUID"] == uuid:
+							return res
+		return None
+	return None
+
+def get_detail_item(u_dic,UUID):
+	res = dict()
+	em = get_item_enum_by_uuid(UUID,u_dic[c_enum])
+	if em == None:
+		return None
+	res = get_des_obj(em["type"]+"/"+em["id"])
+	res.update(em)
+	for it in u_dic[c_inve]:
+		tmp = iter_get_it_byuuid(u_dic,u_dic[c_inve][it],it,UUID)
+		if isinstance(tmp,dict):
+			if "UUID" in tmp:
+				if tmp["UUID"] == UUID:
+					res.update(tmp)
+	return res
 
 @R.add(_("genuserdata"),"oncommand")
 def complete_userdata(msg,orgmsg):
@@ -169,9 +221,26 @@ def complete_userdata(msg,orgmsg):
 	ud = pluginmgr.plgmap["database"].get_user_details(user)
 	if ("data" in ud):
 		res = check_user_obj_enum(ud["data"],m_conf["def_obj_enum"])
-		ud["data"] = res
-		pluginmgr.plgmap["database"].set_user_details(user,ud)
-		return _("Updated user %s data successfully.") % user
+		if refine_inventory(ud["data"]) == -1:
+			return (_("User %s data have error.") % user)
+		else:	
+			ud["data"] = res
+			pluginmgr.plgmap["database"].set_user_details(user,ud)
+			return _("Updated user %s data successfully.") % user
 #		return res
+
+@R.add(_("getitembyid"),"oncommand")
+def wrap_get_detail_item(msg,orgmsg):
+	try:
+		user = msg[1]
+		UUID = msg[2]
+	except IndexError:
+		return None
+	ud = pluginmgr.plgmap["database"].get_user_details(user)
+	res = get_detail_item(ud["data"],UUID)
+	if res == None:
+		return _("UUID %s not found in user data." % UUID)
+	else:
+		return res
 
 load_lib()
