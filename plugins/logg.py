@@ -4,8 +4,8 @@ import pluginmgr
 import config
 import time,os
 import lang
-import subprocess
 import gzip
+import tarfile
 
 m_conf=config.get_plgconf("logg")
 R = main.R
@@ -22,9 +22,11 @@ def check_log_dir():
 
 def go_gzip(s,d):
 	if os.path.isfile(s):
-		cmd = 'cat %s | gzip > %s' % (s,d)
-		p = subprocess.Popen(cmd,shell=True, stdout=subprocess.PIPE)
-		return p.wait()
+		with open(s, 'rb') as f:
+			buf += f.read()
+		with gzip.open(d, 'rb') as f:
+			f.write(buf)
+		return 0
 	else:
 		return -1
 
@@ -44,32 +46,37 @@ def mergelogperday(date, log_path):
 	#date %Y%m%d
 	if not os.path.isdir(log_path):
 		return -1
-	tmp = subprocess.Popen('ls '+log_path+"|grep gz",shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	log_files = [f for f in os.listdir(m_conf["path"]) if os.path.isfile(os.path.join(m_conf["path"], f))]
 	res = list()
-	for l in tmp.stdout.readlines():
-		f_date = os.path.basename(l.decode("utf-8"))[0:8]
+	for f in log_files:
+		f_date = os.path.basename(f)[0:8]
 		if f_date == date:
-			res.append(l.decode("utf-8"))
-	mergegzfile(log_path,res,tmp.stdout.readlines()[0])
-	return 0
+			res.append(f)
+	if len(res) != 0:
+		mergegzfile(log_path,res,res[0])
 
-def tarlog_range(orgmsg,log_path, datefrom, dateto, filename):
+def tar_reset(tarinfo):
+    tarinfo.uid = tarinfo.gid = 0
+    tarinfo.uname = tarinfo.gname = "root"
+    return tarinfo
+
+def tarlog_range(orgmsg, log_path, datefrom, dateto, filename):
 	if not os.path.isdir(log_path):
 		return -1
-	if orgmsg["type"] in ('chat', 'normal'):
-		tmp = subprocess.Popen('ls '+"."+m_conf["path"]+"|grep gz",shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-	else:
-		tmp = subprocess.Popen('ls '+"."+m_conf["path"]+"|grep gz"+"|grep " + orgmsg['from'].bare.split('@',1)[0],shell=True, stdout=subprocess.PIPE)
-	command = 'tar -cvf '+filename+" -C " + log_path + ' '
-	for l in tmp.stdout.readlines():
-		f_date = os.path.basename(l.decode("utf-8"))[0:8]
+	log_files = [f for f in os.listdir(m_conf["path"]) if os.path.isfile(os.path.join(m_conf["path"], f))]
+	if not orgmsg['type'] in ('chat', 'normal'):
+		for item in log_files:
+			if item.find(orgmsg['from'].bare.split('@',1)[0]) == -1:
+				log_files.remove(item)
+	compress_list = list()
+	for f in log_files:
+		f_date = os.path.basename(f)[0:8]
 		if(f_date<=dateto) and (f_date>=datefrom):
-			command += l.decode("utf-8")[:-1] + ' '
-	tmp = subprocess.Popen(command,shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-	res = _("Compressed:\n")
-	for l in tmp.stdout.readlines():
-		res += l.decode("utf-8")
-	return res
+			compress_list.append(f)
+	tar = tarfile.open(filename, "w")
+	for name in compress_list:
+    	tar.add(name, filter=tar_reset)
+	tar.close()
 
 @R.add(_("startlog"),"oncommand")
 def start_log(msg,orgmsg):
@@ -119,38 +126,19 @@ def resume_log(msg,orgmsg):
 
 @R.add(_("lslog"),"oncommand")
 def ls_log(msg,orgmsg):
-	if orgmsg['type'] in ('chat', 'normal'):
-		tmp = subprocess.Popen('ls '+"."+m_conf["path"]+"|grep gz",shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-	else:
-		tmp = subprocess.Popen('ls '+"."+m_conf["path"]+"|grep gz"+"|grep " + orgmsg['from'].bare.split('@',1)[0],shell=True, stdout=subprocess.PIPE)
-	res = ""
-	for l in tmp.stdout.readlines():
-		res+=l.decode("utf-8")
-	if res=="":
+	log_files = [f for f in os.listdir(m_conf["path"]) if os.path.isfile(os.path.join(m_conf["path"], f))]
+	if not orgmsg['type'] in ('chat', 'normal'):
+		for item in log_files:
+			if item.find(orgmsg['from'].bare.split('@',1)[0]) == -1:
+				log_files.remove(item)
+	if len(log_files) == 0:
 		return _("No available log to show.")
-	return res
-
-@R.add(_("rmlog"),"oncommand")
-def rm_log(msg,orgmsg):
-	try:
-		cmd = msg[1]
-		cmd = fliter_command(cmd)
-	except IndexError:
-		return None
-	if orgmsg['type'] in ('chat', 'normal'):
-		tmp = subprocess.Popen('rm -rf '+"."+m_conf["path"]+"/"+cmd,shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 	else:
-		if(cmd.find(orgmsg['from'].bare.split('@',1)[0])==-1):
-			return _("No available log to remove.")
-		tmp = subprocess.Popen('rm -rf '+"."+m_conf["path"]+"/"+cmd,shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-	res = ""
-	if not tmp.stderr == None:
-		for l in tmp.stderr.readlines():
-			res+=l.decode("utf-8")
-	else:
-		for l in tmp.stdout.readlines():
-			res+=l.decode("utf-8")
-	return res
+		res = ""
+		for i in log_files:
+			res += i
+			res += '\n'
+		return res
 
 @R.add(_("catlog"),"oncommand")
 def cat_log(msg,orgmsg):
@@ -159,15 +147,12 @@ def cat_log(msg,orgmsg):
 		cmd = fliter_command(cmd)
 	except IndexError:
 		return None
-	tmp = subprocess.Popen('zcat '+"."+m_conf["path"]+"/"+ cmd,shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-	res = ""
-	if not tmp.stderr == None:
-		for l in tmp.stderr.readlines():
-			res+=l.decode("utf-8")
-	else:
-		for l in tmp.stdout.readlines():
-			res+=l.decode("utf-8")
-	return res
+	if not os.path.isfile(m_conf["path"]+'/'+cmd):
+		return _("File %s not found.") % cmd
+	with gzip.open(m_conf["path"]+'/'+cmd, 'rb') as f:
+		buf += f.read()
+		buf += '\n'
+	return buf
 
 @R.add(_("setignore"),"oncommand")
 def set_ignore(msg,orgmsg):
@@ -189,7 +174,7 @@ def set_ignore(msg,orgmsg):
 			else:
 				return _("The length of ignore character should be one.")
 			return _("Set ignore character to %s successfully.") % cmd
-	return _("This session is not being logged.")		
+	return _("This session is not being logged.")
 
 @R.add(_("tarfile"),"oncommand")
 def gen_file(msg,orgmsg):
@@ -253,7 +238,6 @@ plv.set_priv("startlog",2)
 plv.set_priv("stoplog",2)
 plv.set_priv("pauselog",2)
 plv.set_priv("resumelog",2)
-plv.set_priv("rmlog",0)
 plv.set_priv("lslog",2)
 plv.set_priv("setignore",2)
 
@@ -264,7 +248,6 @@ R.set_help("logg",_("""Log bot usage:
 /resumelog	Resume paused log session.
 /lslog	List all logs.
 /catlog <LOGNAME>	Show log.
-/rmlog <LOGNAME>	Remove log.
 /setignore <IGNORE CHAR> A message started with this character won't be included in log. Leave second parameter to empty to accept all message. IGNORE CHAR format should be separated by ` e.g: (`{`< , then ( { < will be ignored.
-/tarfile 
+/tarfile
 """))
