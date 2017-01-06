@@ -21,10 +21,11 @@ def check_log_dir():
 		return False
 
 def go_gzip(s,d):
+	buf = b""
 	if os.path.isfile(s):
 		with open(s, 'rb') as f:
 			buf += f.read()
-		with gzip.open(d, 'rb') as f:
+		with gzip.open(d, 'wb') as f:
 			f.write(buf)
 		return 0
 	else:
@@ -46,7 +47,8 @@ def mergelogperday(date, log_path):
 	#date %Y%m%d
 	if not os.path.isdir(log_path):
 		return -1
-	log_files = [f for f in os.listdir(m_conf["path"]) if os.path.isfile(os.path.join(m_conf["path"], f))]
+	log_files = [f for f in os.listdir(os.getcwd()+m_conf["path"]) if os.path.isfile(os.path.join(os.getcwd()+m_conf["path"], f))]
+	log_files.sort()
 	res = list()
 	for f in log_files:
 		f_date = os.path.basename(f)[0:8]
@@ -63,20 +65,22 @@ def tar_reset(tarinfo):
 def tarlog_range(orgmsg, log_path, datefrom, dateto, filename):
 	if not os.path.isdir(log_path):
 		return -1
-	log_files = [f for f in os.listdir(m_conf["path"]) if os.path.isfile(os.path.join(m_conf["path"], f))]
+	log_files = [f for f in os.listdir(os.getcwd()+m_conf["path"]) if os.path.isfile(os.path.join(os.getcwd()+m_conf["path"], f))]
+	log_files.sort()
 	if not orgmsg['type'] in ('chat', 'normal'):
-		for item in log_files:
-			if item.find(orgmsg['from'].bare.split('@',1)[0]) == -1:
-				log_files.remove(item)
+		log_files = [ x for x in log_files if orgmsg['from'].bare.split('@',1)[0] in x ]
 	compress_list = list()
+	res = "Compressed:\n"
 	for f in log_files:
 		f_date = os.path.basename(f)[0:8]
 		if(f_date<=dateto) and (f_date>=datefrom):
-			compress_list.append(f)
+			compress_list.append(os.getcwd()+m_conf["path"]+"/"+f)
+			res += (f+'\n')
 	tar = tarfile.open(filename, "w")
 	for name in compress_list:
-    	tar.add(name, filter=tar_reset)
+		tar.add(name, filter=tar_reset, arcname=os.path.basename(name))
 	tar.close()
+	return res
 
 @R.add(_("startlog"),"oncommand")
 def start_log(msg,orgmsg):
@@ -126,11 +130,10 @@ def resume_log(msg,orgmsg):
 
 @R.add(_("lslog"),"oncommand")
 def ls_log(msg,orgmsg):
-	log_files = [f for f in os.listdir(m_conf["path"]) if os.path.isfile(os.path.join(m_conf["path"], f))]
+	log_files = [f for f in os.listdir(os.getcwd()+m_conf["path"]) if os.path.isfile(os.path.join(os.getcwd()+m_conf["path"], f))]
+	log_files.sort()
 	if not orgmsg['type'] in ('chat', 'normal'):
-		for item in log_files:
-			if item.find(orgmsg['from'].bare.split('@',1)[0]) == -1:
-				log_files.remove(item)
+		log_files = [ x for x in log_files if orgmsg['from'].bare.split('@',1)[0] in x ]
 	if len(log_files) == 0:
 		return _("No available log to show.")
 	else:
