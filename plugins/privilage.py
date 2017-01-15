@@ -57,22 +57,39 @@ def check_priv(cmd,username):
 	if not(cmd in priv_map):
 		return True
 	else:
+		r_uname = None
+		if username in pluginmgr.plgmap["xmpp"].m_bot.muc_jid:
+			r_uname = pluginmgr.plgmap["xmpp"].m_bot.muc_jid[username]
 		priv = 100
 		if username in pluginmgr.plgmap["xmpp"].m_bot.roles:
 			if (pluginmgr.plgmap["xmpp"].m_bot.roles[username] == "moderator"):
 				priv = 2
-		ud = pluginmgr.plgmap["database"].get_user_details(username)
+		if username in m_conf["trusted_jid"] or r_uname in m_conf["trusted_jid"]:
+			priv = 0
+		if r_uname == None:
+			ud = pluginmgr.plgmap["database"].get_user_details(username)
+		else:
+			ud = pluginmgr.plgmap["database"].get_user_details(r_uname)
 		if ud == None:
-			print(_("Username: %s info not exist in database. Creating...") % username)
+#			if r_uname == None:
+#				print(_("Username: %s info not exist in database. Creating...") % username)
+#			else:
+#				print(_("Username: %s info not exist in database. Creating...") % r_uname)
 			ud = dict()
 			ud["Privilage"] = 60
-			pluginmgr.plgmap["database"].set_user_details(username,ud)
+			if r_uname == None:
+				pluginmgr.plgmap["database"].set_user_details(username,ud)
+			else:
+				pluginmgr.plgmap["database"].set_user_details(r_uname,ud)
 		if "Privilage" in ud:
 			if ud["Privilage"]<priv:
 				priv = ud["Privilage"]
 		else:
 			ud["Privilage"] = 60
-			pluginmgr.plgmap["database"].set_user_details(username,ud)
+			if r_uname == None:
+				pluginmgr.plgmap["database"].set_user_details(username,ud)
+			else:
+				pluginmgr.plgmap["database"].set_user_details(r_uname,ud)
 		if (priv<=priv_map[cmd]):
 			return True
 		else:

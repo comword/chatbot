@@ -150,10 +150,11 @@ def cat_log(msg,orgmsg):
 		cmd = fliter_command(cmd)
 	except IndexError:
 		return None
-	if not os.path.isfile(m_conf["path"]+'/'+cmd):
+	if not os.path.isfile(os.getcwd()+m_conf["path"]+'/'+cmd):
 		return _("File %s not found.") % cmd
-	with gzip.open(m_conf["path"]+'/'+cmd, 'rb') as f:
-		buf += f.read()
+	buf = ""
+	with gzip.open(os.getcwd()+m_conf["path"]+'/'+cmd, 'rb') as f:
+		buf += f.read().decode("utf-8")
 		buf += '\n'
 	return buf
 
@@ -242,6 +243,7 @@ plv.set_priv("stoplog",2)
 plv.set_priv("pauselog",2)
 plv.set_priv("resumelog",2)
 plv.set_priv("lslog",2)
+plv.set_priv("catlog",2)
 plv.set_priv("setignore",2)
 
 R.set_help("logg",_("""Log bot usage:
