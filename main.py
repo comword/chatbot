@@ -5,6 +5,8 @@ import lang
 import config
 import register
 R = register.R()
+import privilage
+import database
 
 if __name__ == "__main__":
 	import pluginmgr

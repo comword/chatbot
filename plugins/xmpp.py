@@ -2,7 +2,7 @@
 import sleekxmpp
 import config
 import main
-import pluginmgr
+import privilage
 import time
 import lang
 
@@ -69,39 +69,36 @@ class MUCBot(sleekxmpp.ClientXMPP):
 	def message(self,msg):
 		if self.reply_to_nonmuc:
 			if msg['type'] in ('chat', 'normal'):
-				tim = self.check_time(msg['from'],True)
-				if (tim[0]):
-					res = self.proc_msg(msg["body"],msg)
-					if not(res == None):
-						self.send_message(mto=msg['from'].bare,
-				                  mbody="%s" % (res),
-				                  mtype='chat')
-					else:
-						self.send_message(mto=msg['from'].bare,
-				                  mbody=_("Type /help (plugin) to get help. Type /listplugins to list all plugins."),
-				                  mtype='chat')
-				elif not(tim[1] == ""):
-						self.send_message(mto=msg['from'].bare,
-				                  mbody="%s" % (tim[1]),
-				                  mtype='chat')
-				for k in main.R.message_map:
-					main.R.message_map[k](self,msg)
-	def proc_msg(self,subm,msg):
+				f_ind = msg['body'].find('/')
+				if(f_ind != -1 and f_ind < 2):
+					tim = self.check_time(msg['from'],True)
+					if (tim[0]):
+						res = self.proc_msg(msg["body"],msg)
+						if not(res == None):
+							self.send_message(mto=msg['from'].bare,
+					                  mbody="%s" % (res),
+					                  mtype='chat')
+						else:
+							self.send_message(mto=msg['from'].bare,
+					                  mbody=_("Type /help (plugin) to get help. Type /listplugins to list all plugins."),
+					                  mtype='chat')
+					elif not(tim[1] == ""):
+							self.send_message(mto=msg['from'].bare,
+					                  mbody="%s" % (tim[1]),
+					                  mtype='chat')
+					for k in main.R.message_map:
+						main.R.message_map[k](self,msg)
+	def proc_msg(self,msgbody,msg):
 		if msg['from'].bare in lang.lang_map:
 			lang.chg_loc(lang.lang_map[msg['from'].bare])
 		else:
 			lang.lang_map[msg['from'].bare]=lang.c_locale["default"]
 			lang.chg_loc(lang.lang_map[msg['from'].bare])
-		cmd = subm[subm.find("/"):]
-		cmd = cmd.split(" ",1)[0][1:]
-		if(pluginmgr.plgmap["privilage"].check_priv(cmd,str(msg["from"]))):
-			func = main.R.get_command(cmd)
-			if isinstance(func,str):
-				return func
-			else:
-				return func(subm[subm.find("/"):].split(),msg)
+		purecmd = main.R.get_purecmd(msgbody)
+		if privilage.check_priv(purecmd,str(msg["from"])):
+			return main.R.go_call(msgbody,msg)
 		else:
-			return _("%(username)s: Insufficient privileges.") % {'username':msg["from"]}
+			return _("%(username)s: Insufficient privileges.") % {'username':self.get_real_jid(str(msg["from"]))}
 	def check_time(self,user,ischat):
 		if user in last_time:
 			if user in refractory_p:
@@ -136,6 +133,13 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		if sender.bare == self.jid:
 			self.reply_to_nonmuc = False
 		self.sendPresence(pto=sender, pstatus="", pshow="")
+
+	def get_real_jid(self,jid):
+		if jid in self.muc_jid:
+			return self.muc_jid[jid]
+		else:
+			return None
+
 if "resource" in m_conf:
 	m_bot = MUCBot(m_conf["jid"]+'/'+m_conf["resource"], m_conf["password"], m_conf["chatrooms"])
 else:

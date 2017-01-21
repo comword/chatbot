@@ -3,7 +3,6 @@ import plyvel,os
 import config
 m_conf=config.get_plgconf("database")
 import main
-import pluginmgr
 R = main.R
 import json
 import lang
@@ -12,7 +11,10 @@ import yaml
 user_db = os.getcwd()+m_conf["user_path"]
 
 def check_dbs():
-	plyvel.DB(user_db, create_if_missing=True)
+	db = plyvel.DB(user_db, create_if_missing=True)
+	for key, value in db:
+		if key == b'':
+			db.delete("".encode("utf-8"),sync = True)
 
 def get_user_details(uname):
 	db = plyvel.DB(user_db)
@@ -28,11 +30,12 @@ def set_user_details(uname,datas):
 	db.close()
 	return res
 
-@R.add(_("getuinfo"),"oncommand")
-def getu_info(msg,orgmsg):
+@R.add(_("\/getuinfo\s(\w+)\s(\w+)\s(.*)"),"oncommand")
+def getu_info(groups,orgmsg):
 	try:
-		user = msg[1]
-		subdic = msg[2]
+		user = groups.group(1)
+		subdic = groups.group(2)
+		msg = groups.group(3)
 #/getuinfo <username> <firstdir>
 #		0		1			2
 	except IndexError:
@@ -45,10 +48,11 @@ def getu_info(msg,orgmsg):
 			return _("User: %(user)s not found in database.") % {'user':user}
 	tmpdic = udb[subdic]
 	last_ind = subdic
-	for i in range(0,len(msg)-3):
+	msg = msg.split(' ')
+	for i in range(0,len(msg)):
 		if msg[i+3] in tmpdic:
-			tmpdic = tmpdic[msg[i+3]]
-			last_ind = msg[i+3]
+			tmpdic = tmpdic[msg[i]]
+			last_ind = msg[i]
 	if isinstance(tmpdic,dict):
 		res = []
 		for k in tmpdic:
@@ -57,10 +61,10 @@ def getu_info(msg,orgmsg):
 	else:
 		return _("Result: %(res)s") % {'res':(tmpdic)}
 
-@R.add(_("setuinfo"),"oncommand")
-def setu_info(msg,orgmsg):
+@R.add(_("\/setuinfo\s(\w+)\s(\w+)\s(.*)"),"oncommand")
+def setu_info(groups,orgmsg):
 	try:
-		user = msg[1]
+		user = groups.group(1)
 		value = orgmsg['body'].split('|',1)[1]
 		msg = orgmsg['body'].split('|',1)[0].split(' ',1)[1].split(' ')
 	except IndexError:
@@ -93,11 +97,11 @@ def setu_info(msg,orgmsg):
 		set_user_details(user,udb)
 	return operation
 
-@R.add(_("parseyaml"),"oncommand")
-def parse_yaml(msg,orgmsg):
+@R.add(_("\/parseyaml\s(\w+)\s(.*)"),"oncommand")
+def parse_yaml(groups,orgmsg):
 	try:
-		user = msg[1]
-		yml = orgmsg["body"].split(" ",3)[3]
+		user = groups.group(1)
+		yml = groups.group(2)
 	except IndexError:
 		return None
 	try:
@@ -114,11 +118,11 @@ def parse_yaml(msg,orgmsg):
 	set_user_details(user,ud)
 	return _("Set user %s data by parse YAML successfully.") % user
 
-@R.add(_("dumpyaml"),"oncommand")
-def dump_yaml(msg,orgmsg):
+@R.add(_("\/dumpyaml\s(\w+)\s(\w+)\s(.*)"),"oncommand")
+def dump_yaml(groups,orgmsg):
 	try:
-		user = msg[1]
-		subdict = msg[2]
+		user = groups.group(1)
+		subdict = groups.group(2)
 	except IndexError:
 		return None
 	udb = get_user_details(user)
@@ -139,18 +143,18 @@ def dump_yaml(msg,orgmsg):
 	else:
 		return tmpdic
 
-@R.add(_("listuserdbk"),"oncommand")
-def list_userdbk(msg,orgmsg):
+@R.add(_("\/listuserdbk\s?"),"oncommand")
+def list_userdbk(groups,orgmsg):
 	db = plyvel.DB(user_db)
 	res = list()
 	for key, value in db:
 		res.append(key.decode("utf-8"))
 	return res
 
-@R.add(_("deluserdbk"),"oncommand")
-def del_userdbk(msg,orgmsg):
+@R.add(_("\/deluserdbk\s(\w+)"),"oncommand")
+def del_userdbk(groups,orgmsg):
 	try:
-		user = msg[1]
+		user = groups.group(1)
 	except IndexError:
 		return None
 	db = plyvel.DB(user_db)
@@ -159,13 +163,14 @@ def del_userdbk(msg,orgmsg):
 
 check_dbs()
 
-plv = pluginmgr.plgmap["privilage"]
-plv.set_priv("setuinfo",2)
-plv.set_priv("getuinfo",2)
-plv.set_priv("parseyaml",2)
-plv.set_priv("dumpyaml",2)
-plv.set_priv("listuserdbk",2)
-plv.set_priv("deluserdbk",2)
+import privilage
+
+privilage.set_priv("setuinfo",2)
+privilage.set_priv("getuinfo",2)
+privilage.set_priv("parseyaml",2)
+privilage.set_priv("dumpyaml",2)
+privilage.set_priv("listuserdbk",2)
+privilage.set_priv("deluserdbk",2)
 
 R.set_help("database",_("""Database plugin usage:
 /getuinfo <USER NAME> <FIRST CATALOGUE> <...>

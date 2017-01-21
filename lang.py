@@ -3,9 +3,7 @@ import gettext
 import locale
 import os
 import config
-import main
 
-R=main.R
 appname = config.datamap["appname"]
 c_locale=config.get_plgconf("languages")
 gettext.bindtextdomain(appname, os.getcwd()+c_locale["locale"]+"/")
@@ -21,17 +19,17 @@ def_lang.install()
 
 import main
 R = main.R
-@R.add(_("listlangs"),"oncommand")
-def list_langs(msg,orgmsg):
+@R.add(_("\/listlangs\s?"),"oncommand")
+def list_langs(groups,orgmsg):
 	file_list = [os.path.join(dp, f) for dp, dn, filenames in os.walk(os.getcwd()+c_locale["locale"]+"/") for f in filenames if os.path.splitext(f)[1] == '.mo']
 	file_list.sort()
 	languages = [path.split('/')[-3] for path in file_list]
 	return languages
 
-@R.add(_("setlocale"),"oncommand")
-def change_locale(msg,orgmsg):
+@R.add(_("\/setlocale\s(.*)"),"oncommand")
+def change_locale(groups,orgmsg):
 	try:
-		la = msg[1]
+		la = groups.group(1)
 	except IndexError:
 		return None
 	try:

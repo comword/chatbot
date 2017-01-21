@@ -52,7 +52,7 @@ def check_user_obj_enum(usr_info,enum_d):
 					usr_info[enum_d][index] = part_copy(item,des_obj,pcpy)
 		elif isinstance(item,str):
 			des_obj = get_des_obj(item)
-			if not des_obj == None:		
+			if not des_obj == None:
 				usr_info[enum_d][index] = part_copy(dict(),des_obj,pcpy)
 			else:
 				print(_("Object %s not found in library.") % item)
@@ -213,7 +213,7 @@ def get_detail_item(u_dic,UUID):
 	return res
 
 @R.add(_("genuserdata"),"oncommand")
-def complete_userdata(msg,orgmsg):
+def complete_userdata(groups,orgmsg):
 	try:
 		user = msg[1]
 	except IndexError:
@@ -223,14 +223,14 @@ def complete_userdata(msg,orgmsg):
 		res = check_user_obj_enum(ud["data"],m_conf["def_obj_enum"])
 		if refine_inventory(ud["data"]) == -1:
 			return (_("User %s data have error.") % user)
-		else:	
+		else:
 			ud["data"] = res
 			pluginmgr.plgmap["database"].set_user_details(user,ud)
 			return _("Updated user %s data successfully.") % user
 #		return res
 
 @R.add(_("getitembyid"),"oncommand")
-def wrap_get_detail_item(msg,orgmsg):
+def wrap_get_detail_item(groups,orgmsg):
 	try:
 		user = msg[1]
 		UUID = msg[2]

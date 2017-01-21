@@ -1,7 +1,8 @@
 #!/usr/bin/env /usr/bin/python3
 import main
-import pluginmgr
+import privilage
 import config
+
 import time,os
 import lang
 import gzip
@@ -10,7 +11,6 @@ import tarfile
 m_conf=config.get_plgconf("logg")
 R = main.R
 log_path=os.getcwd()+m_conf["path"]
-plv = pluginmgr.plgmap["privilage"]
 log_flag={}
 ISOTIMEFORMAT='%Y-%m-%d %X'
 
@@ -82,8 +82,8 @@ def tarlog_range(orgmsg, log_path, datefrom, dateto, filename):
 	tar.close()
 	return res
 
-@R.add(_("startlog"),"oncommand")
-def start_log(msg,orgmsg):
+@R.add(_("\/startlog\s?"),"oncommand")
+def start_log(groups,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		return _("This session is being logged.")
 	else:
@@ -95,8 +95,8 @@ def start_log(msg,orgmsg):
 		log_flag[orgmsg['from'].bare]["sttime"] = time.localtime()
 		return _("A new log started at %(time)s")% {'time':time.strftime(ISOTIMEFORMAT, time.localtime())}
 
-@R.add(_("stoplog"),"oncommand")
-def stop_log(msg,orgmsg):
+@R.add(_("\/stoplog\s?"),"oncommand")
+def stop_log(groups,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		log_flag[orgmsg['from'].bare]["file"].close()
 		go_gzip(log_flag[orgmsg['from'].bare]["filename"],log_flag[orgmsg['from'].bare]["filename"]+".gz")
@@ -106,8 +106,8 @@ def stop_log(msg,orgmsg):
 	else:
 		return _("This session is not being logged.")
 
-@R.add(_("pauselog"),"oncommand")
-def pause_log(msg,orgmsg):
+@R.add(_("\/pauselog\s?"),"oncommand")
+def pause_log(groups,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		if (log_flag[orgmsg['from'].bare]["logging"] == True):
 			log_flag[orgmsg['from'].bare]["logging"] = False
@@ -117,8 +117,8 @@ def pause_log(msg,orgmsg):
 	else:
 		return _("This session is not being logged.")
 
-@R.add(_("resumelog"),"oncommand")
-def resume_log(msg,orgmsg):
+@R.add(_("\/resumelog\s?"),"oncommand")
+def resume_log(groups,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		if (log_flag[orgmsg['from'].bare]["logging"] == False):
 			log_flag[orgmsg['from'].bare]["logging"] = True
@@ -128,8 +128,8 @@ def resume_log(msg,orgmsg):
 	else:
 		return _("This session is not being logged.")
 
-@R.add(_("lslog"),"oncommand")
-def ls_log(msg,orgmsg):
+@R.add(_("\/lslog\s?"),"oncommand")
+def ls_log(groups,orgmsg):
 	log_files = [f for f in os.listdir(os.getcwd()+m_conf["path"]) if os.path.isfile(os.path.join(os.getcwd()+m_conf["path"], f))]
 	log_files.sort()
 	if not orgmsg['type'] in ('chat', 'normal'):
@@ -143,10 +143,10 @@ def ls_log(msg,orgmsg):
 			res += '\n'
 		return res
 
-@R.add(_("catlog"),"oncommand")
-def cat_log(msg,orgmsg):
+@R.add(_("\/catlog\s(.*)"),"oncommand")
+def cat_log(groups,orgmsg):
 	try:
-		cmd = msg[1]
+		cmd = groups.group(1)
 		cmd = fliter_command(cmd)
 	except IndexError:
 		return None
@@ -158,12 +158,12 @@ def cat_log(msg,orgmsg):
 		buf += '\n'
 	return buf
 
-@R.add(_("setignore"),"oncommand")
-def set_ignore(msg,orgmsg):
+@R.add(_("\/setignore\s(.*)"),"oncommand")
+def set_ignore(groups,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		if(log_flag[orgmsg['from'].bare]["logging"] == True):
 			try:
-				cmd = msg[1]
+				cmd = groups.group(1)
 			except IndexError:
 				log_flag[orgmsg['from'].bare]["ignore_char"] = ''
 				return _("Ignore character removed successfully.")
@@ -180,15 +180,15 @@ def set_ignore(msg,orgmsg):
 			return _("Set ignore character to %s successfully.") % cmd
 	return _("This session is not being logged.")
 
-@R.add(_("tarfile"),"oncommand")
-def gen_file(msg,orgmsg):
+@R.add(_("\/tarfile\s(\d+)\s(\d+)\s(\w+)"),"oncommand")
+def gen_file(groups,orgmsg):
 	try:
-		datefrom = msg[1]
-		dateto = msg[2]
+		datefrom = groups.group(1)
+		dateto = groups.group(2)
 	except IndexError:
 		return None
 	try:
-		filename = msg[3]
+		filename = groups.group(3)
 	except IndexError:
 		filename = log_path+"/"+time.strftime("%Y%m%d%H%M%S", time.localtime())+orgmsg['from'].bare.split('@')[0]+".tar"
 	return tarlog_range(orgmsg,log_path, datefrom, dateto, filename)
@@ -238,13 +238,13 @@ if (check_log_dir() == False):
 	print (_("Log directory not exist, creating..."))
 	os.makedirs(log_path)
 
-plv.set_priv("startlog",2)
-plv.set_priv("stoplog",2)
-plv.set_priv("pauselog",2)
-plv.set_priv("resumelog",2)
-plv.set_priv("lslog",2)
-plv.set_priv("catlog",2)
-plv.set_priv("setignore",2)
+privilage.set_priv("startlog",2)
+privilage.set_priv("stoplog",2)
+privilage.set_priv("pauselog",2)
+privilage.set_priv("resumelog",2)
+privilage.set_priv("lslog",2)
+privilage.set_priv("catlog",2)
+privilage.set_priv("setignore",2)
 
 R.set_help("logg",_("""Log bot usage:
 /startlog	Start a new log session.

@@ -5,9 +5,6 @@ plugins:
     path: /plugins
     loading:
         - xmpp
-        - help
-        - privilage
-        - database
         - library
         - logg
         - dicebot

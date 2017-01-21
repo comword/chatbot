@@ -6,48 +6,34 @@ import lang
 rand = random.SystemRandom()
 
 R = main.R
-@R.add(_("dice"),"oncommand")
-def go_dice(msg,orgmsg):
+@R.add(_("\/dice\s(\d)d(\d)\|?([+|-]?\d)?\s?(.*?)"),"oncommand")
+def go_dice(groups,orgmsg):
 	try:
-		cmd = msg[1]
-	except IndexError:
+		cont = int(groups.group(1))
+		rng = int(groups.group(2))
+	except:
 		return None
 	try:
-		comment = msg[2:]
+		add = int(groups.group(3))
+	except:
+		add = 0
+	try:
+		comment = groups.group(4)
 	except IndexError:
 		comment = ""
-	r_comment=""
-	for i in comment:
-		r_comment = r_comment+i+" "
-	if (cmd.find('d') == -1):
+	if(cont>100 or rng>1000 or rng < 1):
 		return None
-	if not(cmd.find('|') == -1):
-		try:
-			addn = int(cmd.split('|',1)[1])
-			dcmd = cmd.split('|',1)[0]
-		except ValueError:
-			return None
-	else:
-		addn = 0
-		dcmd = cmd
-	if(dcmd.split('d',1)[0].isdigit() and dcmd.split('d',1)[1].isdigit()):
-		cont = int(dcmd.split('d',1)[0])
-		rng = int(dcmd.split('d',1)[1])
-		if(cont>100 or rng>1000 or rng < 1):
-			return None
-		res=[]
-		ressum=0
-		for i in range(0,cont):
-			a = rand.randint(1,rng)
-			ressum += a
-			res.append(a)
-		ressum += addn
-		if addn>=0:
-			return _("%(comment)s Result: %(dices)s+%(addition)i=%(result)i")%{'comment':r_comment,'dices':res,'addition':addn,'result':ressum}
-		elif addn<0:
-			return _("%(comment)s Result: %(dices)s%(addition)i=%(result)i")%{'comment':r_comment,'dices':res,'addition':addn,'result':ressum}
-	else:
-		return None
+	res=[]
+	ressum=0
+	for i in range(0,cont):
+		a = rand.randint(1,rng)
+		ressum += a
+		res.append(a)
+	ressum += add
+	if add>=0:
+		return _("%(comment)s Result: %(dices)s+%(addition)i=%(result)i")%{'comment':comment,'dices':res,'addition':add,'result':ressum}
+	elif add<0:
+		return _("%(comment)s Result: %(dices)s%(addition)i=%(result)i")%{'comment':comment,'dices':res,'addition':add,'result':ressum}
 
 R.set_help("dicebot",_("""Dice bot usage:
 /dice [COUNT]d[LIMIT]|[ADDITION] [DESCRIPTION]
