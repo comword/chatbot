@@ -27,7 +27,7 @@ then
         msgfmt -c -v -f -o $LOCALE_DIR/${n}/LC_MESSAGES/xmppbot.mo ${f}
     done
 else
-# if nothing specified, compile .mo file for every .po file in lang/po
+# if nothing specified, compile .mo file for every .po file in locales/po
     for f in locales/po/*.po
     do
         n=`basename $f .po`

@@ -24,7 +24,7 @@ fi
 
 # Update xmppbot.pot
 echo "Creating .pot file..."
-pygettext3 -o locales/po/xmppbot.pot *.py plugins/*.py
+pygettext3 -o locales/po/xmppbot.pot *.py plugins/*.py locales/json/*.py
 if [ $? -ne 0 ]; then
     echo "Error in pygettext3. Aborting"
     cd $oldpwd
@@ -64,7 +64,7 @@ fi
 
 # Check for broken Unicode symbols
 echo "Check for wrong Unicode symbols..."
-if ! python lang/unicode_check.py locales/po/xmppbot.pott
+if ! python locales/unicode_check.py locales/po/xmppbot.pot
 then
     echo "Updated pot file contain broken Unicode symbols. Aborting."
     cd $oldpwd

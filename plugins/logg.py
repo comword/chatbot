@@ -143,7 +143,7 @@ def ls_log(groups,orgmsg):
 			res += '\n'
 		return res
 
-@R.add(_("\/catlog\s(.*)"),"oncommand")
+@R.add(_("\/catlog\s(\S+)\s?"),"oncommand")
 def cat_log(groups,orgmsg):
 	try:
 		cmd = groups.group(1)
@@ -158,7 +158,7 @@ def cat_log(groups,orgmsg):
 		buf += '\n'
 	return buf
 
-@R.add(_("\/setignore\s(.*)"),"oncommand")
+@R.add(_("\/setignore\s(\S+)\s?"),"oncommand")
 def set_ignore(groups,orgmsg):
 	if orgmsg['from'].bare in log_flag:
 		if(log_flag[orgmsg['from'].bare]["logging"] == True):
@@ -180,7 +180,7 @@ def set_ignore(groups,orgmsg):
 			return _("Set ignore character to %s successfully.") % cmd
 	return _("This session is not being logged.")
 
-@R.add(_("\/tarfile\s(\d+)\s(\d+)\s(\w+)"),"oncommand")
+@R.add(_("\/tarfile\s(\d+)\s(\d+)\s(\S+)\s?"),"oncommand")
 def gen_file(groups,orgmsg):
 	try:
 		datefrom = groups.group(1)

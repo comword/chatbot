@@ -42,7 +42,6 @@ def check_user_obj_enum(usr_info,enum_d):
 	m_list = usr_info[enum_d]
 	for index,item in enumerate(m_list):
 		if isinstance(item,dict):
-#			if "pre-name" in item:
 			if "pre-name" in item and "UUID" not in item: # found a not prepared object
 				des_obj = get_des_obj(item["pre-name"])
 				if des_obj == None:
@@ -118,8 +117,6 @@ def write_back(userinfo,path,info):
 			comm += "[%s]" % p
 		else:
 			comm += "['%s']" % p
-#	if eval('"pre-name" in ' + comm):
-#		exec(comm+".pop('pre-name')") # remove pre-name
 	exec('global tmpdic; tmpdic = ' + comm)
 	tmp = merge_dicts(tmpdic,info)
 	comm += " = tmp"
@@ -212,10 +209,10 @@ def get_detail_item(u_dic,UUID):
 					res.update(tmp)
 	return res
 
-@R.add(_("genuserdata"),"oncommand")
+@R.add(_("\/genuserdata\s(\S+)\s?"),"oncommand")
 def complete_userdata(groups,orgmsg):
 	try:
-		user = msg[1]
+		user = groups.group(1)
 	except IndexError:
 		return None
 	ud = pluginmgr.plgmap["database"].get_user_details(user)
@@ -227,19 +224,18 @@ def complete_userdata(groups,orgmsg):
 			ud["data"] = res
 			pluginmgr.plgmap["database"].set_user_details(user,ud)
 			return _("Updated user %s data successfully.") % user
-#		return res
 
-@R.add(_("getitembyid"),"oncommand")
+@R.add(_("\/getitembyid\s(\S+)\s(\S*)\s?"),"oncommand")
 def wrap_get_detail_item(groups,orgmsg):
 	try:
-		user = msg[1]
-		UUID = msg[2]
+		user = groups.group(1)
+		UUID = groups.group(2)
 	except IndexError:
 		return None
 	ud = pluginmgr.plgmap["database"].get_user_details(user)
 	res = get_detail_item(ud["data"],UUID)
 	if res == None:
-		return _("UUID %s not found in user data." % UUID)
+		return _("UUID %s not found in user data.") % UUID
 	else:
 		return res
 

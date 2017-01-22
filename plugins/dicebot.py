@@ -6,7 +6,7 @@ import lang
 rand = random.SystemRandom()
 
 R = main.R
-@R.add(_("\/dice\s(\d)d(\d)\|?([+|-]?\d)?\s?(.*?)"),"oncommand")
+@R.add(_("\/dice\s(\d+)d(\d+)\|?([+|-]?\d+)?\s?(.*)\s?"),"oncommand")
 def go_dice(groups,orgmsg):
 	try:
 		cont = int(groups.group(1))

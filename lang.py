@@ -26,7 +26,7 @@ def list_langs(groups,orgmsg):
 	languages = [path.split('/')[-3] for path in file_list]
 	return languages
 
-@R.add(_("\/setlocale\s(.*)"),"oncommand")
+@R.add(_("\/setlocale\s(\S+)\s?"),"oncommand")
 def change_locale(groups,orgmsg):
 	try:
 		la = groups.group(1)

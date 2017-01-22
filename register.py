@@ -9,7 +9,7 @@ class R():
 		self.message_map={}
 		self.help_map={}
 		self.cmd_alias={}
-		self.command_map[_("\/help\s+(\w+)")] = self.show_help
+		self.command_map[_("\/help\s(\S+)\s?")] = self.show_help
 	def add(self,*args):
 		def decorator(f):
 			f.register = tuple(args)
@@ -39,7 +39,10 @@ class R():
 
 	def go_call(self,command,orgmsg):
 		for cmd in self.cmd_alias:
-			res = re.search(cmd,command)
+			try:
+				res = re.search(cmd,command)
+			except:
+				return _("Command %(cmd_userinput)s caused a error in %(cmd). It's a bug.") % {'cmd_userinput': command, 'cmd': cmd}
 			if res != None:
 				real_cmd = self.cmd_alias[cmd]
 				if real_cmd in self.command_map:
@@ -70,8 +73,8 @@ class R():
 		tmp={}
 		cmd_list = list()
 		for k in self.command_map:
-			if not _(k)==k:
-				tmp[_(k)]=k
+			if not _(k) == k:
+				tmp[_(k)] = k
 				cmd_list.append(self.get_purecmd_regx(_(k)))
 			cmd_list.append(self.get_purecmd_regx(k))
 		self.cmd_alias = tmp

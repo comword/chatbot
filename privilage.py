@@ -33,14 +33,18 @@ def set_userpriv(user,priv):
 		print(_("Redirecting user privilage change to real JID."))
 		user = pluginmgr.plgmap["xmpp"].m_bot.muc_jid[user]
 	ud = database.get_user_details(user)
+	cre = False
 	if ud == None:
 		ud={}
-		print (_("Username: %s info not exist in database. Creating...") % user)
+		cre = True
 	ud["Privilage"] = int(priv)
 	database.set_user_details(user,ud)
-	return _("Set user %(username)s privilage to %(pri)i successfully.") % {'username':user,'pri':int(priv)}
+	if not cre:
+		return _("Set user %(username)s privilage to %(pri)i successfully.") % {'username':user,'pri':int(priv)}
+	else:
+		return _("Created and set user %(username)s privilage to %(pri)i successfully.") % {'username':user,'pri':int(priv)}
 
-@R.add(_("\/setpriv\s(\w+)\s(\d+)"),"oncommand")
+@R.add(_("\/setpriv\s(\w+)\s(\d+)\s?"),"oncommand")
 def set_priv_msg(groups,orgmsg):
 	try:
 		cmd = groups.group(1)
@@ -49,7 +53,7 @@ def set_priv_msg(groups,orgmsg):
 		return None
 	return set_userpriv(cmd,cmd2)
 
-@R.add(_("\/getpriv\s(\w+)"),"oncommand")
+@R.add(_("\/getpriv\s(\S+)\s?"),"oncommand")
 def get_priv_msg(groups,orgmsg):
 	try:
 		cmd = groups.group(1)
@@ -66,36 +70,26 @@ def check_priv(cmd,username):
 	else:
 		r_uname = pluginmgr.plgmap["xmpp"].m_bot.get_real_jid(username)
 		priv = 100
-		if username in pluginmgr.plgmap["xmpp"].m_bot.roles:
-			if (pluginmgr.plgmap["xmpp"].m_bot.roles[username] == "moderator"):
-				priv = 2
+#		if username in pluginmgr.plgmap["xmpp"].m_bot.roles:
+#			if (pluginmgr.plgmap["xmpp"].m_bot.roles[username] == "moderator"):
+#				priv = 2
 		if username in m_conf["trusted_jid"] or r_uname in m_conf["trusted_jid"]:
 			priv = 0
 		if r_uname == None:
 			ud = database.get_user_details(username)
 		else:
 			ud = database.get_user_details(r_uname)
-		if ud == None:
-			if r_uname == None:
-				print(_("Username: %s info not exist in database. Creating...") % username)
+		if ud != None:
+			if "Privilage" in ud:
+				if ud["Privilage"] < priv:
+					priv = ud["Privilage"]
 			else:
-				print(_("Username: %s info not exist in database. Creating...") % r_uname)
-			ud = dict()
-			ud["Privilage"] = 60
-			if r_uname == None:
-				database.set_user_details(username,ud)
-			else:
-				database.set_user_details(r_uname,ud)
-		if "Privilage" in ud:
-			if ud["Privilage"]<priv:
-				priv = ud["Privilage"]
-		else:
-			ud["Privilage"] = 60
-			if r_uname == None:
-				database.set_user_details(username,ud)
-			else:
-				database.set_user_details(r_uname,ud)
-		if (priv<=priv_map[cmd]):
+				ud["Privilage"] = 60
+				if r_uname == None:
+					database.set_user_details(username,ud)
+				else:
+					database.set_user_details(r_uname,ud)
+		if (priv <= priv_map[cmd]):
 			return True
 		else:
 			return False

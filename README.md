@@ -10,18 +10,12 @@ pip3 install sleekxmpp
 
 pip3 install plyvel
 
+# update pot file
+
+locales/generate_pot.sh
+
 # make translation
 
-pygettext3 -o xmppbot.pot -p locales *.py plugins/*.py
+msginit -l zh_CN -o locales/po/zh_CN.po -i locales/po/xmppbot.pot
 
-msginit -l en_US -o locales/po/en_US.po -i locales/xmppbot.pot
-
-mkdir -p locales/mo/en_US/LC_MESSAGES/
-
-msgfmt -D locales/po -c -v -o locales/mo/en_US/LC_MESSAGES/xmppbot.mo en_US.po
-
-msginit -l zh_CN -o locales/po/zh_CN.po -i locales/xmppbot.pot
-
-mkdir -p locales/mo/zh_CN/LC_MESSAGES/
-
-msgfmt -D locales/po -c -v -o locales/mo/zh_CN/LC_MESSAGES/xmppbot.mo zh_CN.po
+locales/compile_mo.sh
