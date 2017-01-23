@@ -8,6 +8,7 @@ R = main.R
 import json
 import lang
 import uuid
+import database
 
 libpath = os.getcwd()+m_conf["path"]
 lib = dict()
@@ -215,14 +216,14 @@ def complete_userdata(groups,orgmsg):
 		user = groups.group(1)
 	except IndexError:
 		return None
-	ud = pluginmgr.plgmap["database"].get_user_details(user)
+	ud = database.get_user_details(user)
 	if ("data" in ud):
 		res = check_user_obj_enum(ud["data"],m_conf["def_obj_enum"])
 		if refine_inventory(ud["data"]) == -1:
 			return (_("User %s data have error.") % user)
 		else:
 			ud["data"] = res
-			pluginmgr.plgmap["database"].set_user_details(user,ud)
+			database.set_user_details(user,ud)
 			return _("Updated user %s data successfully.") % user
 
 @R.add(_("\/getitembyid\s(\S+)\s(\S*)\s?"),"oncommand")
@@ -232,7 +233,7 @@ def wrap_get_detail_item(groups,orgmsg):
 		UUID = groups.group(2)
 	except IndexError:
 		return None
-	ud = pluginmgr.plgmap["database"].get_user_details(user)
+	ud = database.get_user_details(user)
 	res = get_detail_item(ud["data"],UUID)
 	if res == None:
 		return _("UUID %s not found in user data.") % UUID

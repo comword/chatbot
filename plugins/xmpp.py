@@ -42,7 +42,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 	def muc_message(self, msg):
 		f_ind = msg['body'].find('/')
 		if(f_ind != -1 and f_ind < 2):
-			if main.R.has_command(msg['body'].split("/",1)[1].split(' ',1)[0]) == 1 :
+			if main.R.has_command(msg['body']) == 1 :
 				tim = self.check_time(msg['from'],False)
 				if (tim[0]):
 					res = self.proc_msg(msg["body"],msg)

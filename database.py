@@ -37,19 +37,20 @@ def try_user_poss(user,perfix):
 		udb = get_user_details(perfix+"/"+user)
 		user = perfix+"/"+user
 		if udb == None:
-			return user,None
+			return user,dict()
 		else:
 			return user,udb
+	else:
+		return user,udb
 
-@R.add(_("\/geturoot\s(\w+)\s?"),"oncommand")
+@R.add(_("\/geturoot\s(\S+)\s?"),"oncommand")
 def getu_root(groups,orgmsg):
 	try:
 		user = groups.group(1)
 	except IndexError:
 		return None
 	userf,udb = try_user_poss(user,orgmsg['from'].bare)
-	udb = get_user_details(user)
-	if(udb == None):
+	if(not udb):
 		return _("Either user %(user)s or user %(userf)s not found in database.") % {'user':user,'userf':userf}
 	res = list()
 	for k in udb:
@@ -68,7 +69,7 @@ def create_user(groups,orgmsg):
 		return _("User %s already existed.") % user
 	udb = dict()
 
-@R.add(_("\/getuinfo\s(\w+)\s(\w+)\s?(.*)"),"oncommand")
+@R.add(_("\/getuinfo\s(\S+)\s(\w+)\s?(.*)"),"oncommand")
 def getu_info(groups,orgmsg):
 	try:
 		user = groups.group(1)
@@ -79,12 +80,14 @@ def getu_info(groups,orgmsg):
 	except IndexError:
 		return None
 	userf,udb = try_user_poss(user,orgmsg['from'].bare)
-	if(udb == None):
+	if(not udb):
 		return _("Either user %(user)s or user %(userf)s not found in database.") % {'user':user,'userf':userf}
 	if subdic in udb:
 		tmpdic = udb[subdic]
 	else:
 		return _("Directory %s can't be found in user database.") % subdic
+	if not isinstance(tmpdic,dict):
+		return _("Result: %(res)s") % {'res':(tmpdic)}
 	last_ind = subdic
 	msg = msg.split(' ')
 	for i in range(0,len(msg)):
@@ -108,7 +111,7 @@ def setu_info(groups,orgmsg):
 	except IndexError:
 		return None
 	userf,udb = try_user_poss(user,orgmsg['from'].bare)
-	if udb == None:
+	if not udb:
 		return _("Either user %(user)s or user %(userf)s not found in database.") % {'user':user,'userf':userf}
 	tmpdic = udb
 	last_ind = ""
@@ -143,7 +146,7 @@ def parse_yaml(groups,orgmsg):
 	except Exception as e:
 		return "%s" % e
 	userf,udb = try_user_poss(user,orgmsg['from'].bare)
-	if(udb == None):
+	if(not udb):
 		return _("Either user %(user)s or user %(userf)s not found in database.") % {'user':user,'userf':userf}
 	udb['data'] = datamap
 	set_user_details(user,ud)
@@ -156,12 +159,9 @@ def dump_yaml(groups,orgmsg):
 		subdict = groups.group(2)
 	except IndexError:
 		return None
-	udb = get_user_details(user)
-	if udb == None:
-		udb = get_user_details(orgmsg['from'].bare+"/"+user)
-		user = orgmsg['from'].bare+"/"+user
-		if(udb == None):
-			return _("User: %(user)s not found in database.") % {'user':user}
+	userf,udb = try_user_poss(user,orgmsg['from'].bare)
+	if not udb:
+		return _("Either user %(user)s or user %(userf)s not found in database.") % {'user':user,'userf':userf}
 	if subdict in udb:
 		tmpdic = udb[subdict]
 	else:
