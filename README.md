@@ -10,6 +10,10 @@ pip3 install sleekxmpp
 
 pip3 install plyvel
 
+## For module to suppout IRC protocol
+
+pip3 install irc3
+
 # update pot file
 
 locales/generate_pot.sh

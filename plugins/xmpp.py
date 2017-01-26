@@ -145,10 +145,8 @@ if "resource" in m_conf:
 else:
 	m_bot = MUCBot(m_conf["jid"], m_conf["password"], m_conf["chatrooms"])
 
-def start_xmpp():
-	if m_bot.connect():
-		m_bot.auto_authorize = False
-		m_bot.makePresence(pfrom=m_conf["jid"], pstatus='', pshow='')
-#check whether exist another user.
-		m_bot.sendPresence(pto=m_conf["jid"], ptype='probe')
-		return m_bot
+if m_bot.connect():
+	m_bot.auto_authorize = False
+	m_bot.makePresence(pfrom=m_conf["jid"], pstatus='', pshow='')
+	m_bot.sendPresence(pto=m_conf["jid"], ptype='probe')
+	m_bot.process(block=False)

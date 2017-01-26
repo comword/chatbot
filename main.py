@@ -13,7 +13,5 @@ if __name__ == "__main__":
 	import logging
 	logging.basicConfig(level=logging.INFO,
 		                    format='%(levelname)-8s %(message)s')
-	xmpp = pluginmgr.plgmap["xmpp"].start_xmpp()
-	xmpp.process(block=False)
 	while True:
 		time.sleep(1)

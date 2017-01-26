@@ -7,6 +7,7 @@ import time,os
 import lang
 import gzip
 import tarfile
+import re
 
 m_conf=config.get_plgconf("logg")
 R = main.R
@@ -166,18 +167,13 @@ def set_ignore(groups,orgmsg):
 				cmd = groups.group(1)
 			except IndexError:
 				log_flag[orgmsg['from'].bare]["ignore_char"] = ''
-				return _("Ignore character removed successfully.")
-			if(len(cmd) == 1):
-				log_flag[orgmsg['from'].bare]["ignore_char"] = cmd
-			elif not (cmd.find('`') == -1):
-				chars = cmd.split('`')
-				for i in chars:
-					if len(i)>1:
-						return _("The length of each ignore character should be one.")
-				log_flag[orgmsg['from'].bare]["ignore_char"] = cmd
-			else:
-				return _("The length of ignore character should be one.")
-			return _("Set ignore character to %s successfully.") % cmd
+				return _("Ignore regx removed successfully.")
+			try:
+				re.compile(cmd)
+			except:
+				return _("Regx test failed.")
+			log_flag[orgmsg['from'].bare]["ignore_char"] = cmd
+			return _("Set ignore regx to %s successfully.") % cmd
 	return _("This session is not being logged.")
 
 @R.add(_("\/tarfile\s(\d+)\s(\d+)\s(\S+)\s?"),"oncommand")
@@ -218,21 +214,11 @@ def fliter_command(cmd):
 	return cmd
 
 def check_ign(ignore_str,msg):
-	if(ignore_str == ''):
+	res = re.search(ignore_str,msg)
+	if res == None:
 		return True
-	if(ignore_str.find('`') == -1 and len(ignore_str) == 1):
-		if(msg.find(ignore_str) == -1):
-			return True
-		elif(msg.find(ignore_str) >= 2):
-			return True
+	else:
 		return False
-	if not (ignore_str.find('`') == -1):
-		chars = ignore_str.split('`')
-		for i in chars:
-			if(msg.find(i) >= 0 and msg.find(i) < 2):
-				return False
-		return True
-	return True
 
 if (check_log_dir() == False):
 	print (_("Log directory not exist, creating..."))
