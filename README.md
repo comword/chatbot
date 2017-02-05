@@ -4,11 +4,17 @@ This is a extendable bot with xmpp protocol.
 
 # install
 
+apt-get install gettext build-essential libleveldb-dev libpython3-dev
+
 pip3 install PyYAML
 
 pip3 install sleekxmpp
 
 pip3 install plyvel
+
+pip3 install flask
+
+mkdir -p datas
 
 ## For module to suppout IRC protocol
 

@@ -10,11 +10,11 @@ gettext.bindtextdomain(appname, os.getcwd()+c_locale["locale"]+"/")
 gettext.textdomain(appname)
 lang_map=dict()
 
-#if "default" in c_locale:
-def_lang=gettext.translation(appname, os.getcwd()+c_locale["locale"]+"/", languages=[c_locale["default"]])
-#else:
-#	current_locale, encoding = locale.getdefaultlocale()
-#	def_lang=gettext.translation(appname, os.getcwd()+c_locale["locale"]+"/", languages=[current_locale])
+if "default" in c_locale:
+	def_lang=gettext.translation(appname, os.getcwd()+c_locale["locale"]+"/", languages=[c_locale["default"]])
+else:
+	current_locale, encoding = locale.getdefaultlocale()
+	def_lang=gettext.translation(appname, os.getcwd()+c_locale["locale"]+"/", languages=[current_locale])
 def_lang.install()
 
 import main

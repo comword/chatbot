@@ -35,3 +35,13 @@ plugins:
         path: /libraries
         def_obj_enum: Items_enum
         def_obj_dir: Inventory
+    ircproto:
+        nick: testbot
+        autojoins:
+          - testbot
+        host: irc.undernet.org
+        port: 6667
+        ssl: true
+    htmlext:
+        listen: 12000
+        base: /html

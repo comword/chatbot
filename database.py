@@ -64,10 +64,13 @@ def create_user(groups,orgmsg):
 	except:
 		return None
 	#check user existence
-	udb = get_user_details(user)
+	udb = get_user_details(username)
 	if udb != None:
 		return _("User %s already existed.") % user
 	udb = dict()
+	udb["Privilage"] = 60
+	set_user_details(username,udb)
+	return _("User %s created successfully.") % user
 
 @R.add(_("\/getuinfo\s(\S+)\s(\w+)\s?(.*)"),"oncommand")
 def getu_info(groups,orgmsg):

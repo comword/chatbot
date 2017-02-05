@@ -23,10 +23,10 @@ def get_userpriv(user):
 		print(_("Redirecting user privilage change to real JID."))
 		user = pluginmgr.plgmap["xmpp"].m_bot.muc_jid[user]
 	ud = database.get_user_details(user)
-	if ("Privilage" in ud):
-		return _("Username: %(username)s has privilage %(pri)i.") % {'username':user,'pri':ud["Privilage"]}
-	else:
-		return _("Username: %s info not exist in database.") % user
+	if ud != None:
+		if ("Privilage" in ud):
+			return _("Username: %(username)s has privilage %(pri)i.") % {'username':user,'pri':ud["Privilage"]}
+	return _("Username: %s info not exist in database.") % user
 
 def set_userpriv(user,priv):
 	if user in pluginmgr.plgmap["xmpp"].m_bot.muc_jid:
@@ -85,7 +85,7 @@ def check_priv(cmd,username):
 					priv = ud["Privilage"]
 			else:
 				ud["Privilage"] = 60
-				if r_uname == None:
+				if r_uname == None:# fix not exist Privilage key in database
 					database.set_user_details(username,ud)
 				else:
 					database.set_user_details(r_uname,ud)
