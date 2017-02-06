@@ -48,3 +48,9 @@ def chg_loc(locale):
 	except FileNotFoundError as e:
 		return "%s" % e
 	R.refresh_command_map_lang()
+
+R.set_help("language",_("""Language settings:
+/listlangs
+	list all available languages.
+/setlocale LANGUAGE
+	switch between languages."""))

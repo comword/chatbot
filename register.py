@@ -9,7 +9,7 @@ class R():
 		self.message_map={}
 		self.help_map={}
 		self.cmd_alias={}
-		self.command_map[_("\/help\s(\S+)\s?")] = self.show_help
+		self.command_map[_("\/help\s?(\S+)?\s?")] = self.show_help
 	def add(self,*args):
 		def decorator(f):
 			f.register = tuple(args)
@@ -24,12 +24,16 @@ class R():
 	def show_help(groups,orgmsg):
 		try:
 			cmd = groups.group(1)
-		except IndexError:
-			return _("Type /help (plugin) to get help. Type /listplugins to list all plugins.")
+		except IndexError:#Show all help entry
+			#return _("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help.")
+			res = "All help:\n"
+			for i in self.help_map:
+				res += (i+'\n')
+			return res
 		if cmd in self.help_map:
 			return self.help_map[cmd]
 		else:
-			return _("The help of plugin %(pluginname)s is not being registered in manual.") % {'pluginname':cmd}
+			return _("The help %(name)s is not being registered in manual.") % {'name':cmd}
 
 	def set_help(self,command,context):
 		self.help_map[command] = context

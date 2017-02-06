@@ -3,7 +3,6 @@ import config
 import lang
 import re
 
-
 priv_map = {}
 m_conf=config.get_plgconf("privilage")
 
@@ -44,7 +43,7 @@ def set_userpriv(user,priv):
 	else:
 		return _("Created and set user %(username)s privilage to %(pri)i successfully.") % {'username':user,'pri':int(priv)}
 
-@R.add(_("\/setpriv\s(\w+)\s(\d+)\s?"),"oncommand")
+@R.add(_("\/setpriv\s(\S+)\s(\d+)\s?"),"oncommand")
 def set_priv_msg(groups,orgmsg):
 	try:
 		cmd = groups.group(1)
@@ -98,6 +97,8 @@ set_priv("getpriv",2)
 set_priv("setpriv",2)
 
 R.set_help("privilage",_("""Privilage system usage:
-/setpriv	Set user privilage.
-/getpriv	Get user privilage.
+/setpriv USERNAME PRIVILAGE
+	Set user privilage.
+/getpriv USERNAME
+	Get user privilage.
 """))

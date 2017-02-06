@@ -66,11 +66,11 @@ def create_user(groups,orgmsg):
 	#check user existence
 	udb = get_user_details(username)
 	if udb != None:
-		return _("User %s already existed.") % user
+		return _("User %s already existed.") % username
 	udb = dict()
 	udb["Privilage"] = 60
 	set_user_details(username,udb)
-	return _("User %s created successfully.") % user
+	return _("User %s created successfully.") % username
 
 @R.add(_("\/getuinfo\s(\S+)\s(\w+)\s?(.*)"),"oncommand")
 def getu_info(groups,orgmsg):
@@ -212,10 +212,13 @@ privilage.set_priv("listuserdbk",0)
 privilage.set_priv("deluserdbk",0)
 
 R.set_help("database",_("""Database plugin usage:
-/getuinfo <USER NAME> <FIRST CATALOGUE> <...>
-/setuinfo <USER NAME> <FIRST CATALOGUE> <...>|<DATA>
-/parseyaml <USER NAME> <YAML> This parse YAML document to <USER NAME>/data
-/dumpyaml <USER NAME> <FIRST CATALOGUE> <...>
-/listuserdbk List all user available in database.
-/deluserdbk Remove a user in database.
+/getuinfo USERNAME FIRSTCATALOGUE <...>
+/setuinfo USERNAME FIRSTCATALOGUE <...>|<DATA>
+/parseyaml USERNAME YAML
+	This parse YAML document to USERNAME/data
+/dumpyaml USERNAME FIRSTCATALOGUE <...>
+/listuserdbk
+	List all user available in database.
+/deluserdbk
+	Remove a user in database.
 """))
