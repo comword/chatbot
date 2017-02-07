@@ -12,7 +12,7 @@ from flask import Flask, request, send_from_directory, render_template, redirect
 
 def m_valid_login(user,passw):
 #	if user in pluginmgr.plgmap["xmpp"].m_bot.muc_jid:
-#		print(_("Redirecting user privilage change to real JID."))
+#		print(_("Redirecting user privilege change to real JID."))
 #		user = pluginmgr.plgmap["xmpp"].m_bot.muc_jid[user]
 	ud = database.get_user_details(user)
 	if ud == None:
@@ -43,8 +43,8 @@ class WebServer:
 			if request.method == 'POST':
 				user = request.form['inputUsername']
 				if (m_valid_login(user,None) == True):
-#                    privilage = dbman.get_privilage(user);
-#                    client_jwt = myjwt.generate_JWT(user,privilage)
+#                    privilege = dbman.get_privilege(user);
+#                    client_jwt = myjwt.generate_JWT(user,privilege)
 					response = make_response('home.html')
 					response.set_cookie('username', user)
 					return response

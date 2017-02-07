@@ -1,6 +1,6 @@
 #!/usr/bin/env /usr/bin/python3
 import main
-import privilage
+import privilege
 import config
 
 import time,os
@@ -224,13 +224,13 @@ if (check_log_dir() == False):
 	print (_("Log directory not exist, creating..."))
 	os.makedirs(log_path)
 
-privilage.set_priv("startlog",2)
-privilage.set_priv("stoplog",2)
-privilage.set_priv("pauselog",2)
-privilage.set_priv("resumelog",2)
-privilage.set_priv("lslog",2)
-privilage.set_priv("catlog",2)
-privilage.set_priv("setignore",2)
+privilege.set_priv("startlog",2)
+privilege.set_priv("stoplog",2)
+privilege.set_priv("pauselog",2)
+privilege.set_priv("resumelog",2)
+privilege.set_priv("lslog",2)
+privilege.set_priv("catlog",2)
+privilege.set_priv("setignore",2)
 
 R.set_help("logg",_("""Log bot usage:
 /startlog	Start a new log session.

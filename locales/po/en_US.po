@@ -27622,43 +27622,43 @@ msgid ""
 msgstr ""
 "Don't use this bot too frequently. %(user)s cool time is %(sec)i second."
 
-#: privilage.py
-msgid "Redirecting user privilage change to real JID."
-msgstr "Redirecting user privilage change to real JID."
+#: privilege.py
+msgid "Redirecting user privilege change to real JID."
+msgstr "Redirecting user privilege change to real JID."
 
-#: privilage.py
-msgid "Username: %(username)s has privilage %(pri)i."
-msgstr "Username: %(username)s has privilage %(pri)i."
+#: privilege.py
+msgid "Username: %(username)s has privilege %(pri)i."
+msgstr "Username: %(username)s has privilege %(pri)i."
 
-#: privilage.py
+#: privilege.py
 msgid "Username: %s info not exist in database."
 msgstr "Username: %s info not exist in database."
 
-#: privilage.py
-msgid "Set user %(username)s privilage to %(pri)i successfully."
-msgstr "Set user %(username)s privilage to %(pri)i successfully."
+#: privilege.py
+msgid "Set user %(username)s privilege to %(pri)i successfully."
+msgstr "Set user %(username)s privilege to %(pri)i successfully."
 
-#: privilage.py
-msgid "Created and set user %(username)s privilage to %(pri)i successfully."
-msgstr "Created and set user %(username)s privilage to %(pri)i successfully."
+#: privilege.py
+msgid "Created and set user %(username)s privilege to %(pri)i successfully."
+msgstr "Created and set user %(username)s privilege to %(pri)i successfully."
 
-#: privilage.py
+#: privilege.py
 msgid "\\/setpriv\\s(\\w+)\\s(\\d+)\\s?"
 msgstr "\\/setpriv\\s(\\w+)\\s(\\d+)\\s?"
 
-#: privilage.py
+#: privilege.py
 msgid "\\/getpriv\\s(\\S+)\\s?"
 msgstr "\\/getpriv\\s(\\S+)\\s?"
 
-#: privilage.py
+#: privilege.py
 msgid ""
-"Privilage system usage:\n"
-"/setpriv\tSet user privilage.\n"
-"/getpriv\tGet user privilage.\n"
+"privilege system usage:\n"
+"/setpriv\tSet user privilege.\n"
+"/getpriv\tGet user privilege.\n"
 msgstr ""
-"Privilage system usage:\n"
-"/setpriv\tSet user privilage.\n"
-"/getpriv\tGet user privilage.\n"
+"privilege system usage:\n"
+"/setpriv\tSet user privilege.\n"
+"/getpriv\tGet user privilege.\n"
 
 #: register.py
 msgid "\\/help\\s(\\S+)\\s?"

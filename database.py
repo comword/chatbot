@@ -68,7 +68,7 @@ def create_user(groups,orgmsg):
 	if udb != None:
 		return _("User %s already existed.") % username
 	udb = dict()
-	udb["Privilage"] = 60
+	udb["privilege"] = 60
 	set_user_details(username,udb)
 	return _("User %s created successfully.") % username
 
@@ -94,9 +94,11 @@ def getu_info(groups,orgmsg):
 	last_ind = subdic
 	msg = msg.split(' ')
 	for i in range(0,len(msg)):
-		if msg[i] in tmpdic:
+		try:
 			tmpdic = tmpdic[msg[i]]
 			last_ind = msg[i]
+		except:
+			return _("A error happend during accessing key %s. Please check your input.") % msg[i]
 	if isinstance(tmpdic,dict):
 		res = []
 		for k in tmpdic:
@@ -105,7 +107,7 @@ def getu_info(groups,orgmsg):
 	else:
 		return _("Result: %(res)s") % {'res':(tmpdic)}
 
-@R.add(_("\/setuinfo\s(\w+)\s(.*?)\s*\|((.|\n)*)?"),"oncommand")
+@R.add(_("\/setuinfo\s(\S+)\s(.*?)\s*\|((.|\n)*)?"),"oncommand")
 def setu_info(groups,orgmsg):
 	try:
 		user = groups.group(1)
@@ -118,16 +120,21 @@ def setu_info(groups,orgmsg):
 		return _("Either user %(user)s or user %(userf)s not found in database.") % {'user':user,'userf':userf}
 	tmpdic = udb
 	last_ind = ""
+	if msg[0] == "Privilege":
+		return _("Don't use this function to change privilege.")
 	for i in range(0,len(msg)):
-		if msg[i] in tmpdic:
+		try:
 			tmpdic = tmpdic[msg[i]]
 			last_ind = msg[i]
+		except:
+			return _("A error happend during accessing key %s. Please check your input.") % msg[i]
 	if isinstance(tmpdic,dict):
 		res = []
 		for k in tmpdic:
 			res.append(k)
 		return _("In %(dict)s has %(info)s") % {'dict':last_ind,'info':res} + _(" Please give more specific details.")
 	else:
+		#TODO:remove exec command
 		operation = "udb"
 		for i in range(0,len(msg)):
 			operation += "[\"%s\"]" % msg[i]
@@ -201,15 +208,15 @@ def del_userdbk(groups,orgmsg):
 
 check_dbs()
 
-import privilage
+import privilege
 
-privilage.set_priv("geturoot",0)
-privilage.set_priv("setuinfo",2)
-privilage.set_priv("getuinfo",2)
-privilage.set_priv("parseyaml",2)
-privilage.set_priv("dumpyaml",2)
-privilage.set_priv("listuserdbk",0)
-privilage.set_priv("deluserdbk",0)
+privilege.set_priv("geturoot",0)
+privilege.set_priv("setuinfo",2)
+privilege.set_priv("getuinfo",2)
+privilege.set_priv("parseyaml",2)
+privilege.set_priv("dumpyaml",2)
+privilege.set_priv("listuserdbk",0)
+privilege.set_priv("deluserdbk",0)
 
 R.set_help("database",_("""Database plugin usage:
 /getuinfo USERNAME FIRSTCATALOGUE <...>

@@ -5,7 +5,7 @@ import lang
 import config
 import register
 R = register.R()
-import privilage
+import privilege
 import database
 
 if __name__ == "__main__":

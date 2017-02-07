@@ -2,7 +2,7 @@
 import sleekxmpp
 import config
 import main
-import privilage
+import privilege
 import time
 import lang
 
@@ -95,7 +95,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			lang.lang_map[msg['from'].bare]=lang.c_locale["default"]
 			lang.chg_loc(lang.lang_map[msg['from'].bare])
 		purecmd = main.R.get_purecmd(msgbody)
-		if privilage.check_priv(purecmd,str(msg["from"])):
+		if privilege.check_priv(purecmd,str(msg["from"])):
 			return main.R.go_call(msgbody,msg)
 		else:
 			return _("%(username)s: Insufficient privileges.") % {'username':self.get_real_jid(str(msg["from"]))}
