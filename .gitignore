@@ -1,5 +1,6 @@
 # Datas / configures
-*.yaml
+config.yaml
+ircconfig.ini
 datas/
 logs/
 plugins/personal/
