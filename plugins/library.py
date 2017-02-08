@@ -211,33 +211,33 @@ def get_detail_item(u_dic,UUID):
 	return res
 
 @R.add(_("\/genuserdata\s(\S+)\s?"),"oncommand")
-def complete_userdata(groups,orgmsg):
+def complete_userdata(msg):
 	try:
-		user = groups.group(1)
+		user = msg["res"].group(1)
 	except IndexError:
-		return None
+		return [(None,msg["from"])]
 	ud = database.get_user_details(user)
 	if ("data" in ud):
 		res = check_user_obj_enum(ud["data"],m_conf["def_obj_enum"])
 		if refine_inventory(ud["data"]) == -1:
-			return (_("User %s data have error.") % user)
+			return [(_("User %s data have error.") % user,msg["from"])]
 		else:
 			ud["data"] = res
 			database.set_user_details(user,ud)
-			return _("Updated user %s data successfully.") % user
+			return [(_("Updated user %s data successfully.") % user,msg["from"])]
 
 @R.add(_("\/getitembyid\s(\S+)\s(\S*)\s?"),"oncommand")
-def wrap_get_detail_item(groups,orgmsg):
+def wrap_get_detail_item(msg):
 	try:
-		user = groups.group(1)
-		UUID = groups.group(2)
+		user = msg["res"].group(1)
+		UUID = msg["res"].group(2)
 	except IndexError:
-		return None
+		return [(None,msg["from"])]
 	ud = database.get_user_details(user)
 	res = get_detail_item(ud["data"],UUID)
 	if res == None:
-		return _("UUID %s not found in user data.") % UUID
+		return [(_("UUID %s not found in user data.") % UUID,msg["from"])]
 	else:
-		return res
+		return [(res,msg["from"])]
 
 load_lib()

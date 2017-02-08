@@ -2,18 +2,23 @@
 import main
 import lang
 import config
+import privilege
 m_conf=config.get_plgconf("ircproto")
 
 from irc3.plugins.command import command
+from irc3.testing import ini2config
 import irc3
+import os
+import re
+import threading
+#import ssl
 
 @irc3.plugin
 class MyPlugin:
     requires = [
         'irc3.plugins.core',
-        'irc3.plugins.userlist',
-        'irc3.plugins.command',
-        'irc3.plugins.human',
+#        'irc3.plugins.userlist',
+#        'irc3.plugins.command',
     ]
     def __init__(self, bot):
         self.bot = bot
@@ -26,67 +31,55 @@ class MyPlugin:
 
 #    def connection_lost(self):
 #        """triggered when connection is lost"""
-
     @irc3.event(irc3.rfc.JOIN)
     def welcome(self, mask, channel, **kw):
-        """Welcome people who join a channel"""
-        if mask.nick != self.bot.nick:
-            self.bot.call_with_human_delay(
-                self.bot.privmsg, channel, 'Welcome %s!' % mask.nick)
-        else:
-            self.bot.call_with_human_delay(
-                self.bot.privmsg, channel, "Hi guys!")
+        pass
+#       Welcome people who join a channel
+#        if mask.nick != self.bot.nick:
+#                self.bot.privmsg(channel, 'Welcome %s!' % mask.nick)
+#        else:
+#                self.bot.privmsg(channel, "Hi guys!")
+    @irc3.event(irc3.rfc.INVITE)
+    def on_invite(self, mask=None, channel=None, **kw):
+#        print(mask,channel,kw)
+        self.bot.join(channel)
 
     @irc3.event(irc3.rfc.PRIVMSG)
     def on_privmsg(self, mask=None, data=None, **kw):
-        print(self.chater, mask, data)
-        if self.chater:
-            self.chater.privmsg(self.chater.config.channel,'{0}: {1}'.format(mask.nick, data))
+#        print(mask, data, kw["target"])
+        f_ind = data.find('/')
+        if (f_ind != -1 and f_ind < 2):
+            if kw["target"][0] == '#': #msg in channe
+                purecmd = main.R.get_purecmd(data)
+                if privilege.check_priv(purecmd,"irc:"+mask.nick):
+                    return main.R.go_call(data,make_orgmsg(mask,data,kw["target"]))
+                else:
+                    return _("%(username)s: Insufficient privileges.") % {'username':self.get_real_jid(str(msg["from"]))}
+            else:#privmsg
+                pass
 
-#    @command
-#    def echo(self, mask, target, args):
-#        """Echo command
-#            %%echo <words>...
-#        """
-#        self.bot.privmsg(mask.nick, ' '.join(args['<words>']))
-
-#    @command
-#    def stats(self, mask, target, args):
-#        """Show stats of the channel using the userlist plugin
-#            %%stats [<channel>]
-#        """
-#        if args['<channel>']:
-#            channel = args['<channel>']
-#            target = mask.nick
-#        else:
-#            channel = target
-#        if channel in self.bot.channels:
-#            channel = self.bot.channels[channel]
-#            message = '{0} users'.format(len(channel))
-#            for mode, nicknames in sorted(channel.modes.items()):
-#                message += ' - {0}({1})'.format(mode, len(nicknames))
-#            self.bot.privmsg(target, message)
-
-#    @irc3.extend
-#    def my_usefull_method(self):
-#        """The extend decorator will allow you to call::
-#            bot.my_usefull_method()
-#        """
+    def make_orgmsg(mask,data,target):
+        r = dict()
+        r["from"] = "irc:"+mask.nick
+        if target[0] == '#':
+            r['type'] = "muc"
+            r["mucroom"] = "irc:"+target
+            r['mucnick'] = mask.nick
+        else:
+            r['type'] = 'normal'
+        r['body'] = data
+        return r
 
 def main():
-    # instanciate a bot
-    config = dict(
-        nick=m_conf["nick"], autojoins=m_conf["autojoins"],
-        host=m_conf["host"], port=m_conf["port"], ssl=m_conf["ssl"],
-        includes=[
-            'irc3.plugins.core',
-            'irc3.plugins.command',
-            'irc3.plugins.human',
-            __name__,  # this register MyPlugin
-            ]
-    )
+    conf = os.getcwd() + m_conf
+    if os.path.isfile(conf):
+        conf_f = open(conf)
+        config = ini2config(conf_f.read())
+        conf_f.close()
+    else:
+        print(_("IRC config file does not exist."))
+        return
     bot = irc3.IrcBot.from_config(config)
     bot.run(forever=True)
 
-if __name__ == '__main__':
-    main()
+threading.Thread(target = main, args = (), name = 'thread-ircproto').start()

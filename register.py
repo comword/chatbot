@@ -21,19 +21,19 @@ class R():
 			return f
 		return decorator
 
-	def show_help(groups,orgmsg):
+	def show_help(msg):
 		try:
-			cmd = groups.group(1)
+			cmd = msg["res"].group(1)
 		except IndexError:#Show all help entry
 			#return _("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help.")
 			res = "All help:\n"
 			for i in self.help_map:
 				res += (i+'\n')
-			return res
+			return res,msg["from"]
 		if cmd in self.help_map:
-			return self.help_map[cmd]
+			return self.help_map[cmd],msg["from"]
 		else:
-			return _("The help %(name)s is not being registered in manual.") % {'name':cmd}
+			return [(_("The help %(name)s is not being registered in manual.") % {'name':cmd},msg["from"])]
 
 	def set_help(self,command,context):
 		self.help_map[command] = context
@@ -41,27 +41,25 @@ class R():
 	def set_alias(self,command,alias):
 		self.cmd_alias[alias] = command
 
-	def go_call(self,command,orgmsg):
+	def go_call(self,command):
 		for cmd in self.cmd_alias:
 			try:
-				res = re.search(cmd,command)
+				res = re.search(cmd,command['body'])
 			except:
-				return _("Command %(cmd_userinput)s caused a error in %(cmd). It's a bug.") % {'cmd_userinput': command, 'cmd': cmd}
+				return _("Command %(cmd_userinput)s caused a error in %(cmd). It's a bug.") % {'cmd_userinput': command['body'], 'cmd': cmd},command["from"]
 			if res != None:
 				real_cmd = self.cmd_alias[cmd]
 				if real_cmd in self.command_map:
-					return self.command_map[real_cmd](res,orgmsg)
+					command["res"] = res
+					return self.command_map[real_cmd](command)
 				else:
-					return _("Command %s found in alias name, but it's a broken alias link. It's a bug.") % cmd
+					return _("Command %s found in alias name, but it's a broken alias link. It's a bug.") % cmd,command["from"]
 		for cmd in self.command_map:
-			res = re.search(cmd,command)
+			res = re.search(cmd,command['body'])
 			if res != None:
-				return self.command_map[cmd](res,orgmsg)
-		recmd = self.get_purecmd(command)
-		if (recmd != None):
-			return _("Command %s can't be found.") % recmd
-		else:
-			return None
+				command["res"] = res
+				return self.command_map[cmd](command)
+		return _("Command %s can't be executed.") % command['body'],command["from"]
 
 	def get_purecmd(self,cmd):
 		tmp = re.search('\/(\w+)', cmd)

@@ -5,6 +5,7 @@ import main
 import privilege
 import time
 import lang
+import re
 
 m_conf=config.get_plgconf("xmpp")
 xmpp_priv = {}
@@ -45,21 +46,24 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			if main.R.has_command(msg['body']) == 1 :
 				tim = self.check_time(msg['from'],False)
 				if (tim[0]):
-					res = self.proc_msg(msg["body"],msg)
-					if not(res == None):
-						self.send_message(mto=msg['from'].bare,
-				                      mbody="%s" % (res),
-				                      mtype='groupchat')
-					else:
-						self.send_message(mto=msg['from'].bare,
-		                          mbody=_("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help."),
-		                          mtype='groupchat')
+					l = self.proc_msg(self.build_msg(msg))
+					for res,to in l:
+						if not to == None:
+							target,mtype=self.get_target(to)
+							if not(res == None):
+								self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
+							else:
+								self.send_message(mto=target,mbody=_("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help."), mtype=mtype)
 				elif not(tim[1] == ""):
-					self.send_message(mto=msg['from'].bare,
-				                      mbody="%s" % (tim[1]),
-				                      mtype='groupchat')
+					self.send_message(mto=msg['from'].bare,mbody="%s" % (tim[1]),mtype='groupchat')
+			else:
+				self.send_message(mto=msg['from'].bare,mbody=_("Command can't be found."), mtype='groupchat')
 		for k in main.R.message_map:
-			main.R.message_map[k](self,msg)
+			l = main.R.message_map[k](self.build_msg(msg))
+			for res,to in l:
+				if not (to == None or res == None):
+					target,mtype=self.get_target(to)
+					self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
 	def muc_presence(self, presence):
 		if(presence["muc"]["jid"].bare == None):
 			print(_("Warning: Cannot get real JID in mulituser chatroom, please check your room settings."))
@@ -70,35 +74,43 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		if self.reply_to_nonmuc:
 			if msg['type'] in ('chat', 'normal'):
 				f_ind = msg['body'].find('/')
-				if(f_ind != -1 and f_ind < 2):
-					tim = self.check_time(msg['from'],True)
-					if (tim[0]):
-						res = self.proc_msg(msg["body"],msg)
-						if not(res == None):
-							self.send_message(mto=msg['from'].bare,
-					                  mbody="%s" % (res),
-					                  mtype='chat')
-						else:
-							self.send_message(mto=msg['from'].bare,
-					                  mbody=_("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help."),
-					                  mtype='chat')
-					elif not(tim[1] == ""):
-							self.send_message(mto=msg['from'].bare,
-					                  mbody="%s" % (tim[1]),
-					                  mtype='chat')
-					for k in main.R.message_map:
-						main.R.message_map[k](self,msg)
-	def proc_msg(self,msgbody,msg):
-		if msg['from'].bare in lang.lang_map:
-			lang.chg_loc(lang.lang_map[msg['from'].bare])
+				if main.R.has_command(msg['body']) == 1 :
+					if(f_ind != -1 and f_ind < 2):
+						l = self.proc_msg(self.build_msg(msg))
+						for res,to in l:
+							if not to == None:
+								target,mtype=self.get_target(to)
+								if not(res == None):
+									self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
+								else:
+									self.send_message(mto=target,mbody=_("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help."),mtype=mtype)
+				else:
+					self.send_message(mto=msg["from"].bare,mbody=_("Command can't be found."),mtype='chat')
+				for k in main.R.message_map:
+					l = main.R.message_map[k](self.build_msg(msg))
+					for res,to in l:
+						if not (to == None or res == None):
+							target,mtype=self.get_target(to)
+							self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
+
+	def proc_msg(self,msg):
+		if msg["type"] == 'muc':
+			target = msg["mucroom"]
+			r_jid = "xmpp:"+self.get_real_jid(msg["from"].split(':')[1])
 		else:
-			lang.lang_map[msg['from'].bare]=lang.c_locale["default"]
-			lang.chg_loc(lang.lang_map[msg['from'].bare])
-		purecmd = main.R.get_purecmd(msgbody)
-		if privilege.check_priv(purecmd,str(msg["from"])):
-			return main.R.go_call(msgbody,msg)
+			target = msg["from"]
+			r_jid = msg["from"]
+		if target in lang.lang_map:
+			lang.chg_loc(lang.lang_map[target])
 		else:
-			return _("%(username)s: Insufficient privileges.") % {'username':self.get_real_jid(str(msg["from"]))}
+			lang.lang_map[target]=lang.c_locale["default"]
+			lang.chg_loc(lang.lang_map[target])
+		purecmd = main.R.get_purecmd(msg['body'])
+		if privilege.check_priv(purecmd,r_jid):
+			return main.R.go_call(msg)
+		else:
+			return _("%(username)s: Insufficient privileges.") % {'username':r_jid}, msg["from"]
+
 	def check_time(self,user,ischat):
 		if user in last_time:
 			if user in refractory_p:
@@ -128,6 +140,7 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			if room == it["room"]:
 				return it["nick"]
 		return False
+
 	def handle_probe(self, presence):
 		sender = presence['from']
 		if sender.bare == self.jid:
@@ -138,7 +151,36 @@ class MUCBot(sleekxmpp.ClientXMPP):
 		if jid in self.muc_jid:
 			return self.muc_jid[jid]
 		else:
-			return None
+			return jid
+
+	def build_msg(self,msg):
+		r=dict()
+		if msg["type"] in ('chat', 'normal'):
+			#priv chat
+			r["from"] = "xmpp:"+str(msg["from"].bare)
+			#remove resource xmpp:xxx@im.aaa.com
+			r['type'] = "normal"
+		else:
+			r["mucroom"] = "xmpp:"+str(msg["from"].bare)
+			#xmpp:xxx@conference.im.aaa.com
+			r['mucnick'] = str(msg['mucnick'])
+			r["from"] = "xmpp:"+str(msg["from"])
+			#xmpp:xxx@conference.im.aaa.com/usernick
+			r["realfrom"] = "xmpp:"+self.get_real_jid(str(msg["from"]))
+			#xmpp:xxx@im.aaa.com
+			r['type'] = "muc"
+		r['body'] = str(msg["body"])
+		return r
+
+	def get_target(self,to):
+		target = re.search('xmpp\:(\S*)\/.+',to)
+		if target == None:
+			target = re.search('xmpp\:(\S*)',to).group(1)
+			mtype = 'chat'
+		else:
+			target = target.group(1)
+			mtype = 'groupchat'
+		return target,mtype
 
 if "resource" in m_conf:
 	m_bot = MUCBot(m_conf["jid"]+'/'+m_conf["resource"], m_conf["password"], m_conf["chatrooms"])

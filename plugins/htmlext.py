@@ -7,7 +7,7 @@ import database
 m_conf=config.get_plgconf("htmlext")
 
 import os
-from multiprocessing import Process
+import threading
 from flask import Flask, request, send_from_directory, render_template, redirect, make_response
 
 def m_valid_login(user,passw):
@@ -66,6 +66,5 @@ def st():
 	web = WebServer()
 #	web.app.run(host="0.0.0.0",port=m_conf["listen"],debug=True,threaded=True)
 	web.app.run(host="0.0.0.0",port=m_conf["listen"],threaded=True)
-p = Process(target=st, args=())
-p.start()
-#p.join()
+
+threading.Thread(target = st, args = (), name = 'thread-htmlext').start()

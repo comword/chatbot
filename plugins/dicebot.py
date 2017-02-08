@@ -7,22 +7,22 @@ rand = random.SystemRandom()
 
 R = main.R
 @R.add(_("\/dice\s(\d+)d(\d+)\|?([+|-]?\d+)?\s?(.*)\s?"),"oncommand")
-def go_dice(groups,orgmsg):
+def go_dice(msg):
 	try:
-		cont = int(groups.group(1))
-		rng = int(groups.group(2))
+		cont = int(msg["res"].group(1))
+		rng = int(msg["res"].group(2))
 	except:
-		return None
+		return None,msg["from"]
 	try:
-		add = int(groups.group(3))
+		add = int(msg["res"].group(3))
 	except:
 		add = 0
 	try:
-		comment = groups.group(4)
+		comment = msg["res"].group(4)
 	except IndexError:
 		comment = ""
 	if(cont>100 or rng>1000 or rng < 1):
-		return None
+		return None,msg["from"]
 	res=[]
 	ressum=0
 	for i in range(0,cont):
@@ -31,9 +31,40 @@ def go_dice(groups,orgmsg):
 		res.append(a)
 	ressum += add
 	if add>=0:
-		return _("%(comment)s Result: %(dices)s+%(addition)i=%(result)i")%{'comment':comment,'dices':res,'addition':add,'result':ressum}
+		return [(_("%(comment)s Result: %(dices)s+%(addition)i=%(result)i")%{'comment':comment,'dices':res,'addition':add,'result':ressum},msg["from"])]
 	elif add<0:
-		return _("%(comment)s Result: %(dices)s%(addition)i=%(result)i")%{'comment':comment,'dices':res,'addition':add,'result':ressum}
+		return [(_("%(comment)s Result: %(dices)s%(addition)i=%(result)i")%{'comment':comment,'dices':res,'addition':add,'result':ressum},msg["from"])]
+
+@R.add(_("\/privdice\s(\d+)d(\d+)\|?([+|-]?\d+)?\s?(.*)\s?"),"oncommand")
+def go_privdice(msg):
+	try:
+		cont = int(msg["res"].group(1))
+		rng = int(msg["res"].group(2))
+	except:
+		return None,msg["from"]
+	try:
+		add = int(msg["res"].group(3))
+	except:
+		add = 0
+	try:
+		comment = msg["res"].group(4)
+	except IndexError:
+		comment = ""
+	if(cont>100 or rng>1000 or rng < 1):
+		return None,msg["from"]
+	res=[]
+	ressum=0
+	for i in range(0,cont):
+		a = rand.randint(1,rng)
+		ressum += a
+		res.append(a)
+	ressum += add
+	if add>=0:
+		return [(_("%(comment)s Result: %(dices)s+%(addition)i=%(result)i")%{'comment':comment,'dices':res,'addition':add,'result':ressum},msg["realfrom"]),
+		(_("Result sent."),msg["from"])]
+	elif add<0:
+		return [(_("%(comment)s Result: %(dices)s%(addition)i=%(result)i")%{'comment':comment,'dices':res,'addition':add,'result':ressum},msg["realfrom"]),
+		(_("Result sent."),msg["from"])]
 
 R.set_help("dicebot",_("""Dice bot usage:
 /dice [COUNT]d[LIMIT]|[ADDITION] [DESCRIPTION]

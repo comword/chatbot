@@ -68,8 +68,8 @@ def tarlog_range(orgmsg, log_path, datefrom, dateto, filename):
 		return -1
 	log_files = [f for f in os.listdir(os.getcwd()+m_conf["path"]) if os.path.isfile(os.path.join(os.getcwd()+m_conf["path"], f))]
 	log_files.sort()
-	if not orgmsg['type'] in ('chat', 'normal'):
-		log_files = [ x for x in log_files if orgmsg['from'].bare.split('@',1)[0] in x ]
+	if orgmsg['type'] == 'muc':
+		log_files = [ x for x in log_files if orgmsg['mucroom'].split('@',1)[0] in x ]
 	compress_list = list()
 	res = "Compressed:\n"
 	for f in log_files:
@@ -84,118 +84,131 @@ def tarlog_range(orgmsg, log_path, datefrom, dateto, filename):
 	return res
 
 @R.add(_("\/startlog\s?"),"oncommand")
-def start_log(groups,orgmsg):
-	if orgmsg['from'].bare in log_flag:
-		return _("This session is being logged.")
+def start_log(msg):
+	if not msg['type'] == 'muc':
+		return [(_("The log can only be operated in mulituser chat."),msg["from"])]
+	if msg['mucroom'] in log_flag:
+		return [(_("This session is being logged."),msg["from"])]
 	else:
-		log_flag[orgmsg['from'].bare] = {}
-		log_flag[orgmsg['from'].bare]['ignore_char'] = ''
-		log_flag[orgmsg['from'].bare]["filename"] = log_path+"/"+time.strftime("%Y%m%d%H%M%S", time.localtime())+orgmsg['from'].bare.split('@')[0]+".log"
-		log_flag[orgmsg['from'].bare]["file"] = open(log_flag[orgmsg['from'].bare]["filename"],'w')
-		log_flag[orgmsg['from'].bare]["logging"] = True
-		log_flag[orgmsg['from'].bare]["sttime"] = time.localtime()
-		return _("A new log started at %(time)s")% {'time':time.strftime(ISOTIMEFORMAT, time.localtime())}
+		log_flag[msg['mucroom']] = {}
+		log_flag[msg['mucroom']]['ignore_char'] = ''
+		log_flag[msg['mucroom']]["filename"] = log_path+"/"+time.strftime("%Y%m%d%H%M%S", time.localtime())+msg['mucroom'].split('@')[0]+".log"
+		log_flag[msg['mucroom']]["file"] = open(log_flag[msg['mucroom']]["filename"],'w')
+		log_flag[msg['mucroom']]["logging"] = True
+		log_flag[msg['mucroom']]["sttime"] = time.localtime()
+		return [(_("A new log started at %(time)s")% {'time':time.strftime(ISOTIMEFORMAT, time.localtime())},msg["from"])]
 
 @R.add(_("\/stoplog\s?"),"oncommand")
-def stop_log(groups,orgmsg):
-	if orgmsg['from'].bare in log_flag:
-		log_flag[orgmsg['from'].bare]["file"].close()
-		go_gzip(log_flag[orgmsg['from'].bare]["filename"],log_flag[orgmsg['from'].bare]["filename"]+".gz")
-		os.remove(log_flag[orgmsg['from'].bare]["filename"])
-		log_flag.pop(orgmsg['from'].bare)
-		return _("The log is stopped at %(time)s") % {'time':time.strftime(ISOTIMEFORMAT, time.localtime())}
+def stop_log(msg):
+	if not msg['type'] == 'muc':
+		return [(_("The log can only be operated in mulituser chat."),msg["from"])]
+	if msg['mucroom'] in log_flag:
+		log_flag[msg['mucroom']]["file"].close()
+		go_gzip(log_flag[msg['mucroom']]["filename"],log_flag[msg['mucroom']]["filename"]+".gz")
+		os.remove(log_flag[msg['mucroom']]["filename"])
+		log_flag.pop(msg['mucroom'])
+		return [(_("The log is stopped at %(time)s") % {'time':time.strftime(ISOTIMEFORMAT, time.localtime())},msg["from"])]
 	else:
-		return _("This session is not being logged.")
+		return [(_("This session is not being logged."),msg["from"])]
 
 @R.add(_("\/pauselog\s?"),"oncommand")
-def pause_log(groups,orgmsg):
-	if orgmsg['from'].bare in log_flag:
-		if (log_flag[orgmsg['from'].bare]["logging"] == True):
-			log_flag[orgmsg['from'].bare]["logging"] = False
-			return _("Current log process paused.")
+def pause_log(msg):
+	if not msg['type'] == 'muc':
+		return [(_("The log can only be operated in mulituser chat."),msg["from"])]
+	if msg['mucroom'] in log_flag:
+		if (log_flag[msg['mucroom']]["logging"] == True):
+			log_flag[msg['mucroom']]["logging"] = False
+			return [(_("Current log process paused."),msg["from"])]
 		else:
-			return _("This logging session is paused.")
+			return [(_("This logging session is paused."),msg["from"])]
 	else:
-		return _("This session is not being logged.")
+		return [(_("This session is not being logged."),msg["from"])]
 
 @R.add(_("\/resumelog\s?"),"oncommand")
-def resume_log(groups,orgmsg):
-	if orgmsg['from'].bare in log_flag:
-		if (log_flag[orgmsg['from'].bare]["logging"] == False):
-			log_flag[orgmsg['from'].bare]["logging"] = True
-			return _("Current log process resumed.")
+def resume_log(msg):
+	if not msg['type'] == 'muc':
+		return [(_("The log can only be operated in mulituser chat."),msg["from"])]
+	if msg['mucroom'] in log_flag:
+		if (log_flag[msg['mucroom']]["logging"] == False):
+			log_flag[msg['mucroom']]["logging"] = True
+			return [(_("Current log process resumed."),msg["from"])]
 		else:
-			return _("This logging session is not paused.")
+			return [(_("This logging session is not paused."),msg["from"])]
 	else:
-		return _("This session is not being logged.")
+		return [(_("This session is not being logged."),msg["from"])]
 
 @R.add(_("\/lslog\s?"),"oncommand")
-def ls_log(groups,orgmsg):
+def ls_log(msg):
 	log_files = [f for f in os.listdir(os.getcwd()+m_conf["path"]) if os.path.isfile(os.path.join(os.getcwd()+m_conf["path"], f))]
 	log_files.sort()
-	if not orgmsg['type'] in ('chat', 'normal'):
-		log_files = [ x for x in log_files if orgmsg['from'].bare.split('@',1)[0] in x ]
+	if msg['type'] == 'muc':
+		log_files = [ x for x in log_files if msg['mucroom'].split('@',1)[0] in x ]
 	if len(log_files) == 0:
-		return _("No available log to show.")
+		return [(_("No available log to show."),msg["from"])]
 	else:
 		res = ""
 		for i in log_files:
 			res += i
 			res += '\n'
-		return res
+		return [(res,msg["from"])]
 
 @R.add(_("\/catlog\s(\S+)\s?"),"oncommand")
-def cat_log(groups,orgmsg):
+def cat_log(msg):
 	try:
-		cmd = groups.group(1)
+		cmd = msg["res"].group(1)
 		cmd = fliter_command(cmd)
 	except IndexError:
-		return None
+		return [(None,msg["from"])]
 	if not os.path.isfile(os.getcwd()+m_conf["path"]+'/'+cmd):
-		return _("File %s not found.") % cmd
+		return [(_("File %s not found.") % cmd,msg["from"])]
 	buf = ""
 	with gzip.open(os.getcwd()+m_conf["path"]+'/'+cmd, 'rb') as f:
 		buf += f.read().decode("utf-8")
 		buf += '\n'
-	return buf
+	return [(buf,msg["from"])]
 
 @R.add(_("\/setignore\s(\S+)\s?"),"oncommand")
-def set_ignore(groups,orgmsg):
-	if orgmsg['from'].bare in log_flag:
-		if(log_flag[orgmsg['from'].bare]["logging"] == True):
+def set_ignore(msg):
+	if not msg['type'] == 'muc':
+		return [(_("The log can only be operated in mulituser chat."),msg["from"])]
+	if msg['mucroom'] in log_flag:
+		if(log_flag[msg['mucroom']]["logging"] == True):
 			try:
-				cmd = groups.group(1)
+				cmd = msg["res"].group(1)
 			except IndexError:
-				log_flag[orgmsg['from'].bare]["ignore_char"] = ''
-				return _("Ignore regx removed successfully.")
+				log_flag[msg['mucroom']]["ignore_char"] = ''
+				return [(_("Ignore regex removed successfully."),msg["from"])]
 			try:
 				re.compile(cmd)
 			except:
-				return _("Regx test failed.")
-			log_flag[orgmsg['from'].bare]["ignore_char"] = cmd
-			return _("Set ignore regx to %s successfully.") % cmd
-	return _("This session is not being logged.")
+				return [(_("Regex test failed."),msg["from"])]
+			log_flag[msg['mucroom']]["ignore_char"] = cmd
+			return [(_("Set ignore regex to %s successfully.") % cmd,msg["from"])]
+	return [(_("This session is not being logged."),msg["from"])]
 
 @R.add(_("\/tarfile\s(\d+)\s(\d+)\s(\S+)\s?"),"oncommand")
-def gen_file(groups,orgmsg):
+def gen_file(msg):
 	try:
-		datefrom = groups.group(1)
-		dateto = groups.group(2)
+		datefrom = msg["res"].group(1)
+		dateto = msg["res"].group(2)
 	except IndexError:
-		return None
+		return None,msg["from"]
 	try:
-		filename = groups.group(3)
+		filename = msg["res"].group(3)
 	except IndexError:
-		filename = log_path+"/"+time.strftime("%Y%m%d%H%M%S", time.localtime())+orgmsg['from'].bare.split('@')[0]+".tar"
-	return tarlog_range(orgmsg,log_path, datefrom, dateto, filename)
+		filename = log_path+"/"+time.strftime("%Y%m%d%H%M%S", time.localtime())+msg['mucroom'].split('@')[0]+".tar"
+	return [(tarlog_range(msg,log_path, datefrom, dateto, filename),msg["from"])]
 
 @R.add("proclog","onmessage")
-def proc_log(cla,msg):
-	if msg['from'].bare in log_flag:
-		if(log_flag[msg['from'].bare]["logging"] == True):
-			if(check_ign(log_flag[msg['from'].bare]["ignore_char"],msg["body"])):
-				log_flag[msg['from'].bare]["file"].write(time.strftime("%H:%M:%S", time.localtime())+" "+msg['mucnick']+": "+msg["body"]+"\n")
-				log_flag[msg['from'].bare]["file"].flush()
+def proc_log(msg):
+	if not msg['type'] == 'muc':
+		return [(None,None)]
+	if msg['mucroom'] in log_flag:
+		if(log_flag[msg['mucroom']]["logging"] == True):
+			if(check_ign(log_flag[msg['mucroom']]["ignore_char"],msg["body"])):
+				log_flag[msg['mucroom']]["file"].write(time.strftime("%H:%M:%S", time.localtime())+" "+msg['mucnick']+": "+msg["body"]+"\n")
+				log_flag[msg['mucroom']]["file"].flush()
+	return [(None,None)]
 
 def fliter_command(cmd):
 	cmd = cmd.replace('/',"")

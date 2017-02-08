@@ -1,0 +1,40 @@
+[bot]
+nick = irc3
+username = irc3
+
+host = irc.freenode.net
+port = 7000
+ssl = true
+
+includes =
+    irc3.plugins.core
+#    irc3.plugins.ctcp
+#    irc3.plugins.cron
+    irc3.plugins.autojoins
+#    irc3.plugins.userlist
+#    irc3.plugins.command
+#    irc3.plugins.human
+#    irc3.plugins.search
+#    irc3.plugins.uptime
+#    irc3.plugins.feeds
+#    irc3.plugins.social
+#    irc3.plugins.fifo
+#    freenode_irc3
+    ircproto
+
+# channels to join
+autojoins =
+    irc3
+
+#[irc3.plugins.command]
+# command plugin configuration
+
+# set command char
+#cmd = !
+# enable antiflood on commands
+#antiflood = true
+# set guard policy
+#guard = irc3.plugins.command.mask_based_policy
+
+#[irc3.plugins.command.masks]
+#*!~gael@amandine.bearstech.com = all_permissions
