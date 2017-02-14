@@ -12,7 +12,7 @@ def go_dice(msg):
 		cont = int(msg["res"].group(1))
 		rng = int(msg["res"].group(2))
 	except:
-		return None,msg["from"]
+		return [(None,msg["from"])]
 	try:
 		add = int(msg["res"].group(3))
 	except:
@@ -22,7 +22,7 @@ def go_dice(msg):
 	except IndexError:
 		comment = ""
 	if(cont>100 or rng>1000 or rng < 1):
-		return None,msg["from"]
+		return [(None,msg["from"])]
 	res=[]
 	ressum=0
 	for i in range(0,cont):
@@ -41,7 +41,7 @@ def go_privdice(msg):
 		cont = int(msg["res"].group(1))
 		rng = int(msg["res"].group(2))
 	except:
-		return None,msg["from"]
+		return [(None,msg["from"])]
 	try:
 		add = int(msg["res"].group(3))
 	except:
@@ -51,7 +51,7 @@ def go_privdice(msg):
 	except IndexError:
 		comment = ""
 	if(cont>100 or rng>1000 or rng < 1):
-		return None,msg["from"]
+		return [(None,msg["from"])]
 	res=[]
 	ressum=0
 	for i in range(0,cont):

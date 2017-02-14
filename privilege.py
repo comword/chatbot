@@ -44,7 +44,7 @@ def set_priv_msg(msg):
 		cmd = msg["res"].group(1)
 		cmd2 = msg["res"].group(2)
 	except IndexError:
-		return None
+		return [(None,msg["from"])]
 	return [(set_userpriv(cmd,cmd2),msg["from"])]
 
 @R.add(_("\/getpriv\s(\S+)\s?"),"oncommand")
@@ -52,7 +52,7 @@ def get_priv_msg(msg):
 	try:
 		cmd = msg["res"].group(1)
 	except IndexError:
-		return None
+		return [(None,msg["from"])]
 	return [(get_userpriv(cmd),msg["from"])]
 
 def check_priv(cmd,username):

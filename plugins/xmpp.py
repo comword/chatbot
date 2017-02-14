@@ -47,13 +47,17 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				tim = self.check_time(msg['from'],False)
 				if (tim[0]):
 					l = self.proc_msg(self.build_msg(msg))
-					for res,to in l:
-						if not to == None:
-							target,mtype=self.get_target(to)
-							if not(res == None):
-								self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
-							else:
-								self.send_message(mto=target,mbody=_("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help."), mtype=mtype)
+					try:
+						for res,to in l:
+							if not to == None:
+								target,mtype=self.get_target(to)
+								if not(res == None):
+									self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
+								else:
+									self.send_message(mto=target,mbody=_("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help."), mtype=mtype)
+					except:
+						print(_("An error happened during processing return values."))
+						print(l)
 				elif not(tim[1] == ""):
 					self.send_message(mto=msg['from'].bare,mbody="%s" % (tim[1]),mtype='groupchat')
 			else:

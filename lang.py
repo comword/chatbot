@@ -33,7 +33,7 @@ def change_locale(msg):
 	try:
 		la = msg["res"].group(1)
 	except IndexError:
-		return None
+		return [(None,msg["from"])]
 	try:
 		newlang = gettext.translation(appname, os.getcwd()+c_locale["locale"]+"/", languages=[la])
 		newlang.install()

@@ -192,7 +192,7 @@ def gen_file(msg):
 		datefrom = msg["res"].group(1)
 		dateto = msg["res"].group(2)
 	except IndexError:
-		return None,msg["from"]
+		return [(None,msg["from"])]
 	try:
 		filename = msg["res"].group(3)
 	except IndexError:
