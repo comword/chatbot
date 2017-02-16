@@ -14,6 +14,7 @@ xmpp_priv["participant"] = 4
 refractory_p=m_conf["refractory"]
 refr_alert={}
 last_time = dict()
+B = main.B
 
 class MUCBot(sleekxmpp.ClientXMPP):
 	def __init__(self, jid, password, roomlist):
@@ -46,28 +47,29 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			if main.R.has_command(msg['body']) == 1 :
 				tim = self.check_time(msg['from'],False)
 				if (tim[0]):
-					l = self.proc_msg(self.build_msg(msg))
-					try:
-						for res,to in l:
-							if not to == None:
-								target,mtype=self.get_target(to)
-								if not(res == None):
-									self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
-								else:
-									self.send_message(mto=target,mbody=_("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help."), mtype=mtype)
-					except:
-						print(_("An error happened during processing return values."))
-						print(l)
-				elif not(tim[1] == ""):
-					self.send_message(mto=msg['from'].bare,mbody="%s" % (tim[1]),mtype='groupchat')
-			else:
-				self.send_message(mto=msg['from'].bare,mbody=_("Command can't be found."), mtype='groupchat')
+					self.proc_msg(self.build_msg(msg))
+#					try:
+#						for res,to in l:
+#							if not to == None:
+#								target,mtype=self.get_target(to)
+#								if not(res == None):
+#									self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
+#								else:
+#									self.send_message(mto=target,mbody=_("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help."), mtype=mtype)
+#					except:
+#						print(_("An error happened during processing return values."))
+#						print(l)
+#				elif not(tim[1] == ""):
+#					self.send_message(mto=msg['from'].bare,mbody="%s" % (tim[1]),mtype='groupchat')
+#			else:
+#				self.send_message(mto=msg['from'].bare,mbody=_("Command can't be found."), mtype='groupchat')
 		for k in main.R.message_map:
 			l = main.R.message_map[k](self.build_msg(msg))
 			for res,to in l:
 				if not (to == None or res == None):
-					target,mtype=self.get_target(to)
-					self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
+#					target,mtype=self.get_target(to)
+					B.send_message(res,to)
+#					self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
 	def muc_presence(self, presence):
 		if(presence["muc"]["jid"].bare == None):
 			print(_("Warning: Cannot get real JID in mulituser chatroom, please check your room settings."))
@@ -80,22 +82,23 @@ class MUCBot(sleekxmpp.ClientXMPP):
 				f_ind = msg['body'].find('/')
 				if main.R.has_command(msg['body']) == 1 :
 					if(f_ind != -1 and f_ind < 2):
-						l = self.proc_msg(self.build_msg(msg))
-						for res,to in l:
-							if not to == None:
-								target,mtype=self.get_target(to)
-								if not(res == None):
-									self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
-								else:
-									self.send_message(mto=target,mbody=_("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help."),mtype=mtype)
-				else:
-					self.send_message(mto=msg["from"].bare,mbody=_("Command can't be found."),mtype='chat')
+						self.proc_msg(self.build_msg(msg))
+#						for res,to in l:
+#							if not to == None:
+#								target,mtype=self.get_target(to)
+#								if not(res == None):
+#									self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
+#								else:
+#									self.send_message(mto=target,mbody=_("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help."),mtype=mtype)
+#				else:
+#					self.send_message(mto=msg["from"].bare,mbody=_("Command can't be found."),mtype='chat')
 				for k in main.R.message_map:
 					l = main.R.message_map[k](self.build_msg(msg))
 					for res,to in l:
 						if not (to == None or res == None):
-							target,mtype=self.get_target(to)
-							self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
+							#target,mtype=self.get_target(to)
+							B.send_message(res,to)
+#							self.send_message(mto=target,mbody="%s" % (res),mtype=mtype)
 
 	def proc_msg(self,msg):
 		if msg["type"] == 'muc':
@@ -111,9 +114,9 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			lang.chg_loc(lang.lang_map[target])
 		purecmd = main.R.get_purecmd(msg['body'])
 		if privilege.check_priv(purecmd,r_jid):
-			return main.R.go_call(msg)
+			main.R.go_call(msg,"xmpp:")
 		else:
-			return _("%(username)s: Insufficient privileges.") % {'username':r_jid}, msg["from"]
+			B.send_message(_("%(username)s: Insufficient privileges.") % {'username':r_jid}, msg["from"])
 
 	def check_time(self,user,ischat):
 		if user in last_time:
@@ -186,13 +189,25 @@ class MUCBot(sleekxmpp.ClientXMPP):
 			mtype = 'groupchat'
 		return target,mtype
 
-if "resource" in m_conf:
-	m_bot = MUCBot(m_conf["jid"]+'/'+m_conf["resource"], m_conf["password"], m_conf["chatrooms"])
-else:
-	m_bot = MUCBot(m_conf["jid"], m_conf["password"], m_conf["chatrooms"])
+	def send_msg(self,target,content):
+		target,mtype = self.get_target(target)
+		self.send_message(mto=target,mbody="%s" % (content),mtype=mtype)
+		return True
 
-if m_bot.connect():
-	m_bot.auto_authorize = False
-	m_bot.makePresence(pfrom=m_conf["jid"], pstatus='', pshow='')
-	m_bot.sendPresence(pto=m_conf["jid"], ptype='probe')
-	m_bot.process(block=False)
+global xmpp_bot
+
+if "resource" in m_conf:
+	xmpp_bot = MUCBot(m_conf["jid"]+'/'+m_conf["resource"], m_conf["password"], m_conf["chatrooms"])
+else:
+	xmpp_bot = MUCBot(m_conf["jid"], m_conf["password"], m_conf["chatrooms"])
+
+@B.defnew_protocal("dosend","xmpp:")
+def xmpp_do_send(msg,to):
+	xmpp_bot.send_msg(to,msg)
+	return True
+
+if xmpp_bot.connect():
+	xmpp_bot.auto_authorize = False
+	xmpp_bot.makePresence(pfrom=m_conf["jid"], pstatus='', pshow='')
+	xmpp_bot.sendPresence(pto=m_conf["jid"], ptype='probe')
+	xmpp_bot.process(block=False)

@@ -5,6 +5,7 @@ username = irc3
 host = irc.freenode.net
 port = 7000
 ssl = true
+#ssl_verify = CERT_NONE
 
 includes =
     irc3.plugins.core

@@ -83,7 +83,7 @@ def tarlog_range(orgmsg, log_path, datefrom, dateto, filename):
 	tar.close()
 	return res
 
-@R.add(_("\/startlog\s?"),"oncommand")
+@R.add(_(".*\:\s?\/startlog\s?"),"oncommand")
 def start_log(msg):
 	if not msg['type'] == 'muc':
 		return [(_("The log can only be operated in mulituser chat."),msg["from"])]
@@ -98,7 +98,7 @@ def start_log(msg):
 		log_flag[msg['mucroom']]["sttime"] = time.localtime()
 		return [(_("A new log started at %(time)s")% {'time':time.strftime(ISOTIMEFORMAT, time.localtime())},msg["from"])]
 
-@R.add(_("\/stoplog\s?"),"oncommand")
+@R.add(_(".*\:\s?\/stoplog\s?"),"oncommand")
 def stop_log(msg):
 	if not msg['type'] == 'muc':
 		return [(_("The log can only be operated in mulituser chat."),msg["from"])]
@@ -111,7 +111,7 @@ def stop_log(msg):
 	else:
 		return [(_("This session is not being logged."),msg["from"])]
 
-@R.add(_("\/pauselog\s?"),"oncommand")
+@R.add(_(".*\:\s?\/pauselog\s?"),"oncommand")
 def pause_log(msg):
 	if not msg['type'] == 'muc':
 		return [(_("The log can only be operated in mulituser chat."),msg["from"])]
@@ -124,7 +124,7 @@ def pause_log(msg):
 	else:
 		return [(_("This session is not being logged."),msg["from"])]
 
-@R.add(_("\/resumelog\s?"),"oncommand")
+@R.add(_(".*\:\s?\/resumelog\s?"),"oncommand")
 def resume_log(msg):
 	if not msg['type'] == 'muc':
 		return [(_("The log can only be operated in mulituser chat."),msg["from"])]
@@ -137,7 +137,7 @@ def resume_log(msg):
 	else:
 		return [(_("This session is not being logged."),msg["from"])]
 
-@R.add(_("\/lslog\s?"),"oncommand")
+@R.add(_(".*\:\s?\/lslog\s?"),"oncommand")
 def ls_log(msg):
 	log_files = [f for f in os.listdir(os.getcwd()+m_conf["path"]) if os.path.isfile(os.path.join(os.getcwd()+m_conf["path"], f))]
 	log_files.sort()
@@ -152,7 +152,7 @@ def ls_log(msg):
 			res += '\n'
 		return [(res,msg["from"])]
 
-@R.add(_("\/catlog\s(\S+)\s?"),"oncommand")
+@R.add(_(".*\:\s?\/catlog\s(\S+)\s?"),"oncommand")
 def cat_log(msg):
 	try:
 		cmd = msg["res"].group(1)
@@ -167,7 +167,7 @@ def cat_log(msg):
 		buf += '\n'
 	return [(buf,msg["from"])]
 
-@R.add(_("\/setignore\s(\S+)\s?"),"oncommand")
+@R.add(_(".*\:\s?\/setignore\s(\S+)\s?"),"oncommand")
 def set_ignore(msg):
 	if not msg['type'] == 'muc':
 		return [(_("The log can only be operated in mulituser chat."),msg["from"])]
@@ -186,7 +186,7 @@ def set_ignore(msg):
 			return [(_("Set ignore regex to %s successfully.") % cmd,msg["from"])]
 	return [(_("This session is not being logged."),msg["from"])]
 
-@R.add(_("\/tarfile\s(\d+)\s(\d+)\s(\S+)\s?"),"oncommand")
+@R.add(_(".*\:\s?\/tarfile\s(\d+)\s(\d+)\s(\S+)\s?"),"oncommand")
 def gen_file(msg):
 	try:
 		datefrom = msg["res"].group(1)

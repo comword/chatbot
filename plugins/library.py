@@ -210,7 +210,7 @@ def get_detail_item(u_dic,UUID):
 					res.update(tmp)
 	return res
 
-@R.add(_("\/genuserdata\s(\S+)\s?"),"oncommand")
+@R.add(_(".*\:\s?\/genuserdata\s(\S+)\s?"),"oncommand")
 def complete_userdata(msg):
 	try:
 		user = msg["res"].group(1)
@@ -226,7 +226,7 @@ def complete_userdata(msg):
 			database.set_user_details(user,ud)
 			return [(_("Updated user %s data successfully.") % user,msg["from"])]
 
-@R.add(_("\/getitembyid\s(\S+)\s(\S*)\s?"),"oncommand")
+@R.add(_(".*\:\s?\/getitembyid\s(\S+)\s(\S*)\s?"),"oncommand")
 def wrap_get_detail_item(msg):
 	try:
 		user = msg["res"].group(1)

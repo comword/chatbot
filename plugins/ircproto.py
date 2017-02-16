@@ -23,6 +23,7 @@ class MyPlugin:
     def __init__(self, bot):
         self.bot = bot
         self.log = self.bot.log
+        self.joinoninvite = False
 #    def connection_made(self):
 #        """triggered when connection is up"""
 
@@ -42,7 +43,8 @@ class MyPlugin:
     @irc3.event(irc3.rfc.INVITE)
     def on_invite(self, mask=None, channel=None, **kw):
 #        print(mask,channel,kw)
-        self.bot.join(channel)
+        if self.joinoninvite:
+            self.bot.join(channel)
 
     @irc3.event(irc3.rfc.PRIVMSG)
     def on_privmsg(self, mask=None, data=None, **kw):
@@ -52,7 +54,7 @@ class MyPlugin:
             if kw["target"][0] == '#': #msg in channe
                 purecmd = main.R.get_purecmd(data)
                 if privilege.check_priv(purecmd,"irc:"+mask.nick):
-                    return main.R.go_call(data,make_orgmsg(mask,data,kw["target"]))
+                    l = main.R.go_call(data,self.make_orgmsg(mask,data,kw["target"]))
                 else:
                     return _("%(username)s: Insufficient privileges.") % {'username':self.get_real_jid(str(msg["from"]))}
             else:#privmsg
@@ -70,8 +72,9 @@ class MyPlugin:
         r['body'] = data
         return r
 
-def main():
-    conf = os.getcwd() + m_conf
+def irc_main():
+    global ircbot
+    conf = os.getcwd() + m_conf["config"]
     if os.path.isfile(conf):
         conf_f = open(conf)
         config = ini2config(conf_f.read())
@@ -79,7 +82,15 @@ def main():
     else:
         print(_("IRC config file does not exist."))
         return
-    bot = irc3.IrcBot.from_config(config)
-    bot.run(forever=True)
+    ircbot = irc3.IrcBot.from_config(config)
+    ircbot.joinoninvite = m_conf["joinoninvite"]
+    ircbot.run(forever=True)
 
-threading.Thread(target = main, args = (), name = 'thread-ircproto').start()
+B = main.B
+@B.defnew_protocal("dosend","irc:")
+def irc_do_send(msg,to):
+    global ircbot
+    ircbot.send_msg(to,msg)
+    return True
+
+threading.Thread(target = irc_main, args = (), name = 'thread-ircproto').start()

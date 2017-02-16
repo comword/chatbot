@@ -22,9 +22,9 @@ then
     exit 1
 fi
 
-# Update xmppbot.pot
+# Update chatbot.pot
 echo "Creating .pot file..."
-pygettext3 -o locales/po/xmppbot.pot *.py plugins/*.py locales/json/*.py
+pygettext3 -o locales/po/chatbot.pot *.py plugins/*.py locales/json/*.py
 if [ $? -ne 0 ]; then
     echo "Error in pygettext3. Aborting"
     cd $oldpwd
@@ -32,12 +32,12 @@ if [ $? -ne 0 ]; then
 fi
 
 # Fix msgfmt errors
-#if [ "`head -n1 locales/po/xmppbot.pot`" = "# SOME DESCRIPTIVE TITLE." ]
+#if [ "`head -n1 locales/po/chatbot.pot`" = "# SOME DESCRIPTIVE TITLE." ]
 #then
 #    echo "Fixing .pot file headers..."
-#    package="xmppbot"
+#    package="chatbot"
 #    version=$(grep '^VERSION *= *' Makefile | tr -d [:space:] | cut -f 2 -d '=')
-#    pot_file="locales/po/xmppbot.pot"
+#    pot_file="locales/po/chatbot.pot"
 #    sed -e "1,6d" \
 #    -e "s/^\"Project-Id-Version:.*\"$/\"Project-Id-Version: $package $version\\\n\"/1" \
 #    -e "/\"Plural-Forms:.*\"$/d" $pot_file > $pot_file.temp
@@ -46,7 +46,7 @@ fi
 
 # strip line-numbers from the .pot file
 echo "Stripping .pot file from unneeded comments..."
-if ! python locales/strip_line_numbers.py locales/po/xmppbot.pot
+if ! python locales/strip_line_numbers.py locales/po/chatbot.pot
 then
     echo "Error in strip_line_numbers.py. Aborting"
     cd $oldpwd
@@ -55,7 +55,7 @@ fi
 
 # Final compilation check
 echo "Check pot-file compilation..."
-if ! msgfmt -c -o /dev/null locales/po/xmppbot.pot
+if ! msgfmt -c -o /dev/null locales/po/chatbot.pot
 then
     echo "Updated pot file contain gettext errors. Aborting."
     cd $oldpwd
@@ -64,7 +64,7 @@ fi
 
 # Check for broken Unicode symbols
 echo "Check for wrong Unicode symbols..."
-if ! python locales/unicode_check.py locales/po/xmppbot.pot
+if ! python locales/unicode_check.py locales/po/chatbot.pot
 then
     echo "Updated pot file contain broken Unicode symbols. Aborting."
     cd $oldpwd

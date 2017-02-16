@@ -11,6 +11,8 @@ import yaml
 user_db = os.getcwd()+m_conf["user_path"]
 
 def check_dbs():
+	if not os.path.exists(user_db):
+		os.makedirs(user_db)
 	db = plyvel.DB(user_db, create_if_missing=True)
 	for key, value in db:
 		if key == b'':
@@ -43,7 +45,7 @@ def try_user_poss(user,perfix):
 	else:
 		return user,udb
 
-@R.add(_("\/geturoot\s(\S+)\s?"),"oncommand")
+@R.add(_(".*\:\s?\/geturoot\s(\S+)\s?"),"oncommand")
 def getu_root(msg):
 	try:
 		user = msg["res"].group(1)
@@ -57,7 +59,7 @@ def getu_root(msg):
 		res.append(k)
 	return [(res,msg["from"])]
 
-@R.add(_("\/createuser\s(\S+)\s?"),"oncommand")
+@R.add(_(".*\:\s?\/createuser\s(\S+)\s?"),"oncommand")
 def create_user(msg):
 	try:
 		username = msg["res"].group(1)
@@ -72,7 +74,7 @@ def create_user(msg):
 	set_user_details(username,udb)
 	return [(_("User %s created successfully.") % username,msg["from"])]
 
-@R.add(_("\/getuinfo\s(\S+)\s(\w+)\s?(.*)"),"oncommand")
+@R.add(_(".*\:\s?\/getuinfo\s(\S+)\s(\w+)\s?(.*)"),"oncommand")
 def getu_info(msg):
 	try:
 		user = msg["res"].group(1)
@@ -107,7 +109,7 @@ def getu_info(msg):
 	else:
 		return [(_("Result: %(res)s") % {'res':(tmpdic)},msg["from"])]
 
-@R.add(_("\/setuinfo\s(\S+)\s(.*?)\s*\|((.|\n)*)?"),"oncommand")
+@R.add(_(".*\:\s?\/setuinfo\s(\S+)\s(.*?)\s*\|((.|\n)*)?"),"oncommand")
 def setu_info(msg):
 	try:
 		user = msg["res"].group(1)
@@ -144,7 +146,7 @@ def setu_info(msg):
 		set_user_details(user,udb)
 	return [(operation,msg["from"])]
 
-@R.add(_("\/parseyaml\s(.+?)\s((.|\n)*)"),"oncommand")
+@R.add(_(".*\:\s?\/parseyaml\s(.+?)\s((.|\n)*)"),"oncommand")
 def parse_yaml(msg):
 	try:
 		user = msg["res"].group(1)
@@ -162,7 +164,7 @@ def parse_yaml(msg):
 	set_user_details(user,ud)
 	return [(_("Set user %s data by parse YAML successfully.") % user,msg["from"])]
 
-@R.add(_("\/dumpyaml\s(.+?)\s(\w+)\s?(.*)?"),"oncommand")
+@R.add(_(".*\:\s?\/dumpyaml\s(.+?)\s(\w+)\s?(.*)?"),"oncommand")
 def dump_yaml(msg):
 	try:
 		user = msg["res"].group(1)
@@ -188,7 +190,7 @@ def dump_yaml(msg):
 	else:
 		return [(tmpdic,msg["from"])]
 
-@R.add(_("\/listuserdbk\s?"),"oncommand")
+@R.add(_(".*\:\s?\/listuserdbk\s?"),"oncommand")
 def list_userdbk(msg):
 	db = plyvel.DB(user_db)
 	res = list()
@@ -196,7 +198,7 @@ def list_userdbk(msg):
 		res.append(key.decode("utf-8"))
 	return [(res,msg["from"])]
 
-@R.add(_("\/deluserdbk\s((.|\n)*)"),"oncommand")
+@R.add(_(".*\:\s?\/deluserdbk\s((.|\n)*)"),"oncommand")
 def del_userdbk(msg):
 	try:
 		user = msg["res"].group(1)

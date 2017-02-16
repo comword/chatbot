@@ -5,6 +5,8 @@ import lang
 import config
 import register
 R = register.R()
+import protobridge
+B = protobridge.Protocals()
 import privilege
 import database
 

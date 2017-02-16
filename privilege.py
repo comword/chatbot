@@ -38,7 +38,7 @@ def set_userpriv(user,priv):
 	else:
 		return _("Created and set user %(username)s privilege to %(pri)i successfully.") % {'username':user,'pri':int(priv)}
 
-@R.add(_("\/setpriv\s(\S+)\s(\d+)\s?"),"oncommand")
+@R.add(_(".*\:\s?\/setpriv\s(\S+)\s(\d+)\s?"),"oncommand")
 def set_priv_msg(msg):
 	try:
 		cmd = msg["res"].group(1)
@@ -47,7 +47,7 @@ def set_priv_msg(msg):
 		return [(None,msg["from"])]
 	return [(set_userpriv(cmd,cmd2),msg["from"])]
 
-@R.add(_("\/getpriv\s(\S+)\s?"),"oncommand")
+@R.add(_(".*\:\s?\/getpriv\s(\S+)\s?"),"oncommand")
 def get_priv_msg(msg):
 	try:
 		cmd = msg["res"].group(1)
@@ -63,8 +63,10 @@ def check_priv(cmd,username):
 		return True
 	else:
 		priv = 100
-		if username in m_conf["trusted_jid"]:
-			priv = 0
+		if not m_conf == None:
+			if "trusted_jid" in m_conf:
+				if username in m_conf["trusted_jid"]:
+					priv = 0
 		ud = database.get_user_details(username)
 		if ud != None:
 			if "privilege" in ud:

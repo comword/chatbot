@@ -1,6 +1,7 @@
 #!/usr/bin/env /usr/bin/python3
 import lang
 import re
+import main
 
 class R():
 	def __init__(self):
@@ -9,15 +10,15 @@ class R():
 		self.message_map={}
 		self.help_map={}
 		self.cmd_alias={}
-		self.command_map[_("\/help\s?(\S+)?\s?")] = self.show_help
+		self.command_map[_(".*\:\s?\/help\s?(\S+)?\s?")] = self.show_help
 	def add(self,*args):
 		def decorator(f):
-			f.register = tuple(args)
-			if(tuple(args)[1] == "oncommand"):
-				self.command_map[tuple(args)[0]] = f
-				self.cmd_list.append(self.get_purecmd_regx(tuple(args)[0]))
-			elif(tuple(args)[1] == "onmessage"):
-				self.message_map[tuple(args)[0]] = f
+			arg = tuple(args)
+			if(arg[1] == "oncommand"):
+				self.command_map[arg[0]] = f
+				self.cmd_list.append(self.get_purecmd_regx(arg[0]))
+			elif(arg[1] == "onmessage"):
+				self.message_map[arg[0]] = f
 			return f
 		return decorator
 
@@ -41,25 +42,34 @@ class R():
 	def set_alias(self,command,alias):
 		self.cmd_alias[alias] = command
 
-	def go_call(self,command):
+	def go_call(self,command,protocal):
+		command['body'] = protocal + command['body'] #xmpp:/xxx
 		for cmd in self.cmd_alias:
 			try:
 				res = re.search(cmd,command['body'])
 			except:
-				return _("Command %(cmd_userinput)s caused a error in %(cmd). It's a bug.") % {'cmd_userinput': command['body'], 'cmd': cmd},command["from"]
+				return main.B.send_message(_("Command %(cmd_userinput)s caused a error in %(cmd). It's a bug.") % {'cmd_userinput': command['body'], 'cmd': cmd},command["from"])
 			if res != None:
 				real_cmd = self.cmd_alias[cmd]
 				if real_cmd in self.command_map:
 					command["res"] = res
-					return self.command_map[real_cmd](command)
+					func_res = self.command_map[real_cmd](command)
+					send_result = main.B.go_route(self.build_route_msg(func_res,command["from"]))
+					for msg,to in send_result:
+						return main.B.send_message(msg,to)
+					return True
 				else:
-					return _("Command %s found in alias name, but it's a broken alias link. It's a bug.") % cmd,command["from"]
+					return main.B.send_message(_("Command %s found in alias name, but it's a broken alias link. It's a bug.") % cmd,command["from"])
 		for cmd in self.command_map:
 			res = re.search(cmd,command['body'])
 			if res != None:
 				command["res"] = res
-				return self.command_map[cmd](command)
-		return _("Command %s can't be executed.") % command['body'],command["from"]
+				func_res = self.command_map[cmd](command)
+				send_result = main.B.go_route(self.build_route_msg(func_res,command["from"]))
+				for msg,to in send_result:
+					return main.B.send_message(msg,to)
+				return True
+		return main.B.send_message(_("Command %s can't be executed.") % command['body'],command["from"])
 
 	def get_purecmd(self,cmd):
 		tmp = re.search('\/(\w+)', cmd)
@@ -87,3 +97,9 @@ class R():
 			return 1
 		else:
 			return 0
+
+	def build_route_msg(self,msgs,rfrom):
+		res = dict()
+		res["body"] = msgs
+		res["from"] = rfrom
+		return res

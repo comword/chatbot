@@ -23,7 +23,7 @@ def load_plugin(plugindir,mod_name):
 	print(_("Loading plugin: %(name)s , %(desc)s") %{'name':filename, 'desc':description})
 	return imp.load_module(mod_name, f, filename, description)
 
-@R.add(_("\/listplugins\s?"),"oncommand")
+@R.add(_(".*\:\s?\/listplugins\s?"),"oncommand")
 def list_plugin(msg):
 	res = _("All plugin:\n")
 	for k in plgmap:

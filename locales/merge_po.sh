@@ -48,22 +48,21 @@ then
     done
 fi
 
-# merge locales/po/xmppbot.pot with .po file for each specified language
+# merge locales/po/chatbot.pot with .po file for each specified language
 if [ $# -gt 0 ]
 then
     for n in $@
     do
         echo "updating locales/po/${n}.po"
-        msgmerge -F -U locales/po/${n}.po locales/po/xmppbot.pot
+        msgmerge -F -U locales/po/${n}.po locales/po/chatbot.pot
     done
-# otherwise merge locales/po/xmppbot.pot with all .po files in locales/po
+# otherwise merge locales/po/chatbot.pot with all .po files in locales/po
 else
     for f in locales/po/*.po
     do
         echo "updating $f"
-        msgmerge -F -U $f locales/po/xmppbot.pot
+        msgmerge -F -U $f locales/po/chatbot.pot
     done
 fi
 
 cd $oldpwd
-

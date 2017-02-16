@@ -24,7 +24,7 @@ then
     do
         f="locales/po/${n}.po"
         mkdir -p $LOCALE_DIR/${n}/LC_MESSAGES
-        msgfmt -c -v -f -o $LOCALE_DIR/${n}/LC_MESSAGES/xmppbot.mo ${f}
+        msgfmt -c -v -f -o $LOCALE_DIR/${n}/LC_MESSAGES/chatbot.mo ${f}
     done
 else
 # if nothing specified, compile .mo file for every .po file in locales/po
@@ -32,7 +32,7 @@ else
     do
         n=`basename $f .po`
         mkdir -p $LOCALE_DIR/${n}/LC_MESSAGES
-        msgfmt -c -v -f -o $LOCALE_DIR/${n}/LC_MESSAGES/xmppbot.mo ${f}
+        msgfmt -c -v -f -o $LOCALE_DIR/${n}/LC_MESSAGES/chatbot.mo ${f}
     done
 fi
 

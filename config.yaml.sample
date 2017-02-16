@@ -1,6 +1,6 @@
 %YAML 1.2
 ---
-appname: xmppbot
+appname: chatbot
 plugins:
     path: /plugins
     loading:
@@ -35,7 +35,9 @@ plugins:
         path: /libraries
         def_obj_enum: Items_enum
         def_obj_dir: Inventory
-    ircproto: /ircconfig.ini
+    ircproto:
+        config: /ircconfig.ini
+        joinoninvite: true
     htmlext:
         listen: 12000
         base: /html

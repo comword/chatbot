@@ -6,7 +6,7 @@ import lang
 rand = random.SystemRandom()
 
 R = main.R
-@R.add(_("\/dice\s(\d+)d(\d+)\|?([+|-]?\d+)?\s?(.*)\s?"),"oncommand")
+@R.add(_(".*\:\s?\/dice\s(\d+)d(\d+)\|?([+|-]?\d+)?\s?(.*)\s?"),"oncommand")
 def go_dice(msg):
 	try:
 		cont = int(msg["res"].group(1))
@@ -35,7 +35,7 @@ def go_dice(msg):
 	elif add<0:
 		return [(_("%(comment)s Result: %(dices)s%(addition)i=%(result)i")%{'comment':comment,'dices':res,'addition':add,'result':ressum},msg["from"])]
 
-@R.add(_("\/privdice\s(\d+)d(\d+)\|?([+|-]?\d+)?\s?(.*)\s?"),"oncommand")
+@R.add(_(".*\:\s?\/privdice\s(\d+)d(\d+)\|?([+|-]?\d+)?\s?(.*)\s?"),"oncommand")
 def go_privdice(msg):
 	try:
 		cont = int(msg["res"].group(1))

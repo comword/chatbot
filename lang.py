@@ -21,14 +21,14 @@ def_lang.install()
 
 import main
 R = main.R
-@R.add(_("\/listlangs\s?"),"oncommand")
+@R.add(_(".*\:\s?\/listlangs\s?"),"oncommand")
 def list_langs(msg):
 	file_list = [os.path.join(dp, f) for dp, dn, filenames in os.walk(os.getcwd()+c_locale["locale"]+"/") for f in filenames if os.path.splitext(f)[1] == '.mo']
 	file_list.sort()
 	languages = [path.split('/')[-3] for path in file_list]
 	return [(languages,msg["from"])]
 
-@R.add(_("\/setlocale\s(\S+)\s?"),"oncommand")
+@R.add(_(".*\:\s?\/setlocale\s(\S+)\s?"),"oncommand")
 def change_locale(msg):
 	try:
 		la = msg["res"].group(1)
