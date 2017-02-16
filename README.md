@@ -20,6 +20,10 @@ mkdir -p datas
 
 pip3 install irc3
 
+## For module to suppout telegram protocol
+
+pip3 install python-telegram-bot --upgrade
+
 # update pot file
 
 locales/generate_pot.sh

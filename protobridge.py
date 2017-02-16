@@ -50,4 +50,4 @@ def cmd_say(msg):
         return [(res,msg["from"])]
 
 import privilege
-privilege.set_priv("say",0)
+#privilege.set_priv("say",0)

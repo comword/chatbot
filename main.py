@@ -13,7 +13,6 @@ import database
 if __name__ == "__main__":
 	import pluginmgr
 	import logging
-	logging.basicConfig(level=logging.INFO,
-		                    format='%(levelname)-8s %(message)s')
+	logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 	while True:
 		time.sleep(1)

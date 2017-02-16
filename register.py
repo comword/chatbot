@@ -22,17 +22,16 @@ class R():
 			return f
 		return decorator
 
-	def show_help(msg):
-		try:
-			cmd = msg["res"].group(1)
-		except IndexError:#Show all help entry
-			#return _("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help.")
-			res = "All help:\n"
+	def show_help(self,msg):
+		cmd = msg["res"].group(1)
+		if cmd == None:
+			res = _("Type /help HELPENTRY to get help. Leave HELPENTRY to empty to get all registered help.\n")
+			res += "All help:\n"
 			for i in self.help_map:
 				res += (i+'\n')
-			return res,msg["from"]
+			return [(res,msg["from"])]
 		if cmd in self.help_map:
-			return self.help_map[cmd],msg["from"]
+			return [(self.help_map[cmd],msg["from"])]
 		else:
 			return [(_("The help %(name)s is not being registered in manual.") % {'name':cmd},msg["from"])]
 

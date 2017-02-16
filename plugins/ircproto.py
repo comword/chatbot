@@ -1,5 +1,6 @@
 #!/usr/bin/env /usr/bin/python3
 import main
+B = main.B
 import lang
 import config
 import privilege
@@ -11,7 +12,6 @@ import irc3
 import os
 import re
 import threading
-#import ssl
 
 @irc3.plugin
 class MyPlugin:
@@ -51,25 +51,33 @@ class MyPlugin:
 #        print(mask, data, kw["target"])
         f_ind = data.find('/')
         if (f_ind != -1 and f_ind < 2):
-            if kw["target"][0] == '#': #msg in channe
-                purecmd = main.R.get_purecmd(data)
-                if privilege.check_priv(purecmd,"irc:"+mask.nick):
-                    l = main.R.go_call(data,self.make_orgmsg(mask,data,kw["target"]))
-                else:
-                    return _("%(username)s: Insufficient privileges.") % {'username':self.get_real_jid(str(msg["from"]))}
-            else:#privmsg
-                pass
+            target = kw["target"]
+            if target in lang.lang_map:
+                lang.chg_loc(lang.lang_map[target])
+            else:
+                lang.lang_map[target]=lang.c_locale["default"]
+                lang.chg_loc(lang.lang_map[target])
+#            if target[0] == '#': #msg in channel
+            purecmd = main.R.get_purecmd(data)
+            if privilege.check_priv(purecmd,"irc:"+mask.nick):
+                main.R.go_call(self.make_orgmsg(mask,data,kw["target"]),"irc:")
+            else:
+                B.send_message(_("%(username)s: Insufficient privileges.") % {'username':mask.nick}, "irc:"+target)
+#            else:#privmsg
+#                pass
 
-    def make_orgmsg(mask,data,target):
+    def make_orgmsg(self,mask,data,target):
         r = dict()
-        r["from"] = "irc:"+mask.nick
         if target[0] == '#':
             r['type'] = "muc"
             r["mucroom"] = "irc:"+target
             r['mucnick'] = mask.nick
+            r["from"] = "irc:"+target
         else:
             r['type'] = 'normal'
+            r["from"] = "irc:"+mask.nick
         r['body'] = data
+        r['realfrom'] = "irc:"+mask.nick
         return r
 
 def irc_main():
@@ -86,11 +94,11 @@ def irc_main():
     ircbot.joinoninvite = m_conf["joinoninvite"]
     ircbot.run(forever=True)
 
-B = main.B
 @B.defnew_protocal("dosend","irc:")
 def irc_do_send(msg,to):
+    rtarget = re.search("irc\:(.*)",to).group(1)
     global ircbot
-    ircbot.send_msg(to,msg)
+    ircbot.privmsg(rtarget,msg,nowait=True)
     return True
 
 threading.Thread(target = irc_main, args = (), name = 'thread-ircproto').start()

@@ -41,3 +41,5 @@ plugins:
     htmlext:
         listen: 12000
         base: /html
+    telegram:
+        token: 111111111:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
