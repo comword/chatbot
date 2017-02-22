@@ -43,3 +43,4 @@ plugins:
         base: /html
     telegram:
         token: 111111111:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        database: /datas/tg.db

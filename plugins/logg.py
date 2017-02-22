@@ -214,7 +214,7 @@ def fliter_command(cmd):
 	cmd = cmd.replace('/',"")
 	cmd = cmd.replace('\\',"")
 	cmd = cmd.replace(';',"")
-	cmd = cmd.replace(':',"")
+#	cmd = cmd.replace(':',"")
 	cmd = cmd.replace('`',"")
 	cmd = cmd.replace('"',"")
 	cmd = cmd.replace('\'',"")

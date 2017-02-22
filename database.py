@@ -17,6 +17,7 @@ def check_dbs():
 	for key, value in db:
 		if key == b'':
 			db.delete("".encode("utf-8"),sync = True)
+	db.close()
 
 def get_user_details(uname):
 	db = plyvel.DB(user_db)
